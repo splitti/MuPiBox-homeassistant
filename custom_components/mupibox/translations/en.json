@@ -1,0 +1,31 @@
+{
+  "title": "MuPiBox-NG",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to MuPiBox-NG",
+        "description": "Connect Home Assistant to the local MuPiBox-NG API. The admin password is optional and is only needed for protected maintenance actions such as rescan, restart, reboot and power off.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "API port",
+          "use_ssl": "Use HTTPS",
+          "admin_password": "Admin password (optional)"
+        },
+        "data_description": {
+          "host": "Hostname or IP address without http:// or https://.",
+          "port": "MuPiBox-NG listens on port 8090 by default.",
+          "use_ssl": "Enable only when MuPiBox-NG is reached through an HTTPS reverse proxy.",
+          "admin_password": "Leave empty if no admin password is configured or if Home Assistant should only use public player/status functions."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to MuPiBox-NG.",
+      "invalid_auth": "The MuPiBox-NG admin password is invalid.",
+      "unknown": "Unexpected error while connecting to MuPiBox-NG."
+    },
+    "abort": {
+      "already_configured": "This MuPiBox-NG endpoint is already configured."
+    }
+  }
+}
