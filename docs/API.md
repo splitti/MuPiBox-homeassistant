@@ -12,7 +12,7 @@ Install the integration from this repository with HACS:
 
 1. Open **HACS → Integrations**.
 2. Open the menu and choose **Custom repositories**.
-3. Add `https://github.com/splitti/MuPiBox` as category **Integration**.
+3. Add `https://github.com/splitti/MuPiBox-homeassistant` as category **Integration**.
 4. Install **MuPiBox**.
 5. Restart Home Assistant.
 6. Open **Settings → Devices & services → Add integration → MuPiBox**.
@@ -29,7 +29,8 @@ One Home Assistant device is created per configured MuPiBox.
 | --- | --- | --- |
 | `media_player` Local Player | Local files: play/pause/stop, previous/next, seek, volume, media browser | `GET /api/status`, `GET /api/library`, `POST /api/command` |
 | `media_player` Spotify Connect | Spotify Connect status and transport/volume control | `GET /api/spotify/status`, `POST /api/spotify/command` |
-| `notify` Announcements | Local Piper TTS announcement on the box | `POST /api/speak` |\n| `camera` Display | Current display screenshot on demand | `GET /api/admin/screenshot` |
+| `notify` Announcements | Local Piper TTS announcement on the box | `POST /api/speak` |
+| `camera` Display | Current display screenshot on demand | `GET /api/admin/screenshot` |
 | Battery sensor | MuPiHAT/system battery percentage when available | `GET /api/system` |
 | Wi-Fi signal/quality | RSSI, quality and interface | `GET /api/system` |
 | Version / audio backend | Diagnostics | `GET /api/info`, `GET /api/status` |
@@ -49,7 +50,7 @@ Example automation action:
 ```yaml
 action: notify.send_message
 target:
-  entity_id: notify.mupibox_ng_announcements
+  entity_id: notify.mupibox_announcements
 data:
   message: "Essen ist fertig."
 ```
