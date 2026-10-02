@@ -38,5 +38,39 @@
       "already_configured": "Diese MuPiBox ist bereits eingerichtet.",
       "invalid_discovery": "Der gefundene Dienst konnte nicht als diese MuPiBox verifiziert werden."
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "network_online": {
+        "name": "Netzwerk erreichbar"
+      },
+      "tts_enabled": {
+        "name": "Sprachausgabe aktiv"
+      }
+    },
+    "button": {
+      "rescan_library": {
+        "name": "Medienbibliothek neu einlesen"
+      },
+      "restart_ui": {
+        "name": "Oberfläche neu starten"
+      },
+      "reboot": {
+        "name": "Box neu starten"
+      },
+      "power_off": {
+        "name": "Box ausschalten"
+      }
+    },
+    "sensor": {
+      "playback_engine": {
+        "name": "Wiedergabe-Engine"
+      }
+    },
+    "select": {
+      "audio_output": {
+        "name": "Audioausgabe"
+      }
+    }
   }
 }

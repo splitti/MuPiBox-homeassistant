@@ -94,6 +94,10 @@ def _remove_obsolete_entities(hass: HomeAssistant, entry: MuPiBoxConfigEntry) ->
         if entity.unique_id.endswith("_spotify_connect"):
             entity_reg.async_remove(entity.entity_id)
             _LOGGER.info("Removed obsolete separate Spotify media player %s", entity.entity_id)
+            continue
+        if entity.domain == "sensor" and entity.unique_id.endswith("_audio_output"):
+            entity_reg.async_remove(entity.entity_id)
+            _LOGGER.info("Removed obsolete read-only audio output sensor %s", entity.entity_id)
 
 
 def _migrate_config_entry_identity(

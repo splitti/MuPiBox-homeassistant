@@ -19,4 +19,4 @@ AUTH_UPDATE_INTERVAL_SECONDS = 60
 PROVIDER_UPDATE_INTERVAL_SECONDS = 30
 METRICS_UPDATE_INTERVAL_SECONDS = 10
 
-PLATFORMS = ["media_player", "sensor", "binary_sensor", "button", "notify", "camera"]
+PLATFORMS = ["media_player", "sensor", "binary_sensor", "button", "notify", "camera", "select"]

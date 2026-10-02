@@ -38,7 +38,8 @@ class MuPiBoxAdminButton(MuPiBoxEntity, ButtonEntity):
 
 
 class MuPiBoxRescanLibraryButton(MuPiBoxAdminButton):
-    _attr_name = "Rescan library"
+    _attr_translation_key = "rescan_library"
+    _attr_has_entity_name = True
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         super().__init__(entry, "rescan_library")
@@ -49,7 +50,8 @@ class MuPiBoxRescanLibraryButton(MuPiBoxAdminButton):
 
 
 class MuPiBoxRestartUIButton(MuPiBoxAdminButton):
-    _attr_name = "Restart UI"
+    _attr_translation_key = "restart_ui"
+    _attr_has_entity_name = True
     _attr_device_class = ButtonDeviceClass.RESTART
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
@@ -61,7 +63,8 @@ class MuPiBoxRestartUIButton(MuPiBoxAdminButton):
 
 
 class MuPiBoxRebootButton(MuPiBoxAdminButton):
-    _attr_name = "Reboot"
+    _attr_translation_key = "reboot"
+    _attr_has_entity_name = True
     _attr_device_class = ButtonDeviceClass.RESTART
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
@@ -74,7 +77,8 @@ class MuPiBoxRebootButton(MuPiBoxAdminButton):
 
 
 class MuPiBoxPowerOffButton(MuPiBoxAdminButton):
-    _attr_name = "Power off"
+    _attr_translation_key = "power_off"
+    _attr_has_entity_name = True
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         super().__init__(entry, "power_off")

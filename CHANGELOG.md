@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+
+- Replace the read-only Audio output sensor with a selectable Home Assistant Audio output entity.
+- Allow switching directly between currently available local, Bluetooth, Sonos and Music Assistant output targets.
+- Hide the low-level playback-engine diagnostic by default; it remains available for troubleshooting.
+- Add user-friendly English/German entity names for network status, TTS status and maintenance buttons.
+
 ## 0.3.1
 
 - Rename the misleading `Audio backend` diagnostic to `Playback engine`; `mpv` describes the player engine, not the Linux audio stack.

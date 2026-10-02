@@ -243,6 +243,16 @@ class MuPiBoxApiClient:
             raise
         return result if isinstance(result, dict) else {}
 
+    async def async_select_output_target(self, target_id: str) -> dict[str, Any]:
+        """Switch the MuPiBox to a discovered output target."""
+        result = await self.async_request_json(
+            "POST",
+            "/api/output-targets/select",
+            json_data={"target_id": target_id},
+            timeout=30,
+        )
+        return result if isinstance(result, dict) else {}
+
     async def async_get_provider_status(self) -> dict[str, Any]:
         """Return safe provider connectivity summaries."""
         try:

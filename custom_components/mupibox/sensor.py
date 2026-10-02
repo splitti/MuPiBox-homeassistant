@@ -49,7 +49,6 @@ async def async_setup_entry(
         MuPiBoxTTSProviderSensor(entry),
         MuPiBoxVersionSensor(entry),
         MuPiBoxPlaybackEngineSensor(entry),
-        MuPiBoxAudioOutputSensor(entry),
     ]
     entities.extend(MuPiBoxProviderStatusSensor(entry, provider) for provider in PROVIDER_NAMES)
     async_add_entities(entities)
@@ -336,8 +335,10 @@ class MuPiBoxVersionSensor(MuPiBoxEntity, SensorEntity):
 
 
 class MuPiBoxPlaybackEngineSensor(MuPiBoxEntity, SensorEntity):
-    _attr_name = "Playback engine"
+    _attr_translation_key = "playback_engine"
+    _attr_has_entity_name = True
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         # Preserve the original unique-id suffix from <=0.3.0 so an existing
@@ -348,38 +349,3 @@ class MuPiBoxPlaybackEngineSensor(MuPiBoxEntity, SensorEntity):
     def native_value(self) -> str | None:
         value = self.coordinator.data.status.get("backend") or self.coordinator.data.info.get("backend")
         return str(value) if value else None
-
-
-class MuPiBoxAudioOutputSensor(MuPiBoxEntity, SensorEntity):
-    _attr_name = "Audio output"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-
-    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
-        super().__init__(entry, "audio_output")
-
-    def _active_target(self) -> dict[str, Any] | None:
-        targets = self.coordinator.data.output_targets.get("targets")
-        if not isinstance(targets, list):
-            return None
-        for target in targets:
-            if isinstance(target, dict) and target.get("active"):
-                return target
-        return None
-
-    @property
-    def available(self) -> bool:
-        return super().available and self._active_target() is not None
-
-    @property
-    def native_value(self) -> str | None:
-        target = self._active_target()
-        return str(target.get("name")) if target and target.get("name") else None
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        target = self._active_target() or {}
-        return {
-            key: target[key]
-            for key in ("id", "kind", "subtitle", "available", "selectable", "paired")
-            if key in target
-        }

@@ -34,7 +34,8 @@ async def async_setup_entry(
 
 
 class MuPiBoxOnlineBinarySensor(MuPiBoxEntity, BinarySensorEntity):
-    _attr_name = "Network online"
+    _attr_translation_key = "network_online"
+    _attr_has_entity_name = True
     _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
@@ -131,7 +132,8 @@ class MuPiBoxSpotifyBinarySensor(MuPiBoxEntity, BinarySensorEntity):
 
 
 class MuPiBoxTTSBinarySensor(MuPiBoxEntity, BinarySensorEntity):
-    _attr_name = "TTS enabled"
+    _attr_translation_key = "tts_enabled"
+    _attr_has_entity_name = True
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:

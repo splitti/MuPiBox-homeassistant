@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.3.1
+**Home Assistant integration version:** 0.3.2
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -19,7 +19,8 @@ The Home Assistant integration is versioned independently from MuPiBox-NG.
 - Live MuPiHAT battery percentage, voltage, current, charging/external-power and temperature diagnostics
 - Wi-Fi/network diagnostics including signal, quality, interface and IP address
 - CPU, RAM, storage and CPU-temperature diagnostics
-- Separate diagnostics for the playback engine (`mpv`) and the currently active audio output/route
+- Selectable audio output for local playback, Bluetooth, Sonos and Music Assistant targets currently available to the box
+- Optional playback-engine diagnostic (`mpv`), disabled by default because it is only useful for troubleshooting
 - Active playback-provider sensor and provider status for Spotify, Music Assistant, Jellyfin, Audible and Sendspin
 - Library rescan and UI restart controls
 - Reboot and power-off controls with optional MuPiBox Admin authentication
