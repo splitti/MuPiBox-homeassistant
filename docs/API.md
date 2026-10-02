@@ -15,9 +15,11 @@ Install the integration from this repository with HACS:
 3. Add `https://github.com/splitti/MuPiBox-homeassistant` as category **Integration**.
 4. Install **MuPiBox**.
 5. Restart Home Assistant.
-6. Open **Settings → Devices & services → Add integration → MuPiBox**.
-7. Enter the MuPiBox hostname/IP and port. The default API port is `8090`.
-8. Enter the MuPiBox admin password only if protected maintenance controls should be available in Home Assistant.
+6. A discovery-enabled MuPiBox appears automatically under **Settings → Devices & services → Discovered**. Select **Configure** and confirm the device.
+7. Optionally enter the MuPiBox Admin password if protected maintenance controls should be available.
+8. If mDNS is unavailable on the network, use **Add integration → MuPiBox** and enter the hostname/IP and port manually.
+
+MuPiBox advertises `_mupibox._tcp.local.` and includes its persistent `box_id` in the TXT records. The integration verifies that ID against `GET /api/info` before creating the config entry. The same ID is used across DHCP address changes.
 
 For development before a HACS-visible release, copy `custom_components/mupibox` into `<HA config>/custom_components/mupibox` and restart Home Assistant.
 
@@ -110,7 +112,7 @@ The Home Assistant integration performs this login itself and keeps the returned
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/api/health` | Liveness and MuPiBox version |
-| GET | `/api/info` | Version, simulation flag, audio backend, TTS/power/display/theme summary |
+| GET | `/api/info` | Version, persistent `box_id`, simulation flag, audio backend, TTS/power/display/theme summary |
 | GET | `/api/system` | Network, Wi-Fi RSSI/quality and battery state |
 | GET | `/api/ui-state` | UI restart generation |
 | GET | `/api/home` | Data-driven categories, rows and normalized items |

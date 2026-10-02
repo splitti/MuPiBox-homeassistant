@@ -17,6 +17,16 @@
           "use_ssl": "Nur aktivieren, wenn MuPiBox über einen HTTPS-Reverse-Proxy erreichbar ist.",
           "admin_password": "Leer lassen, wenn kein Admin-Passwort gesetzt ist oder Home Assistant nur die öffentlichen Player-/Statusfunktionen verwenden soll."
         }
+      },
+      "zeroconf_confirm": {
+        "title": "MuPiBox gefunden",
+        "description": "Home Assistant hat {name} im lokalen Netzwerk gefunden. Bestätige, um die Box hinzuzufügen. Das Admin-Passwort ist optional und wird nur für geschützte Wartungsaktionen benötigt.",
+        "data": {
+          "admin_password": "Admin-Passwort (optional)"
+        },
+        "data_description": {
+          "admin_password": "Für normale Player-, TTS- und Statusfunktionen leer lassen. Eintragen, wenn auch geschützte Wartungsaktionen verfügbar sein sollen."
+        }
       }
     },
     "error": {
@@ -25,7 +35,8 @@
       "unknown": "Beim Verbinden mit MuPiBox ist ein unerwarteter Fehler aufgetreten."
     },
     "abort": {
-      "already_configured": "Dieser MuPiBox-Endpunkt ist bereits eingerichtet."
+      "already_configured": "Diese MuPiBox ist bereits eingerichtet.",
+      "invalid_discovery": "Der gefundene Dienst konnte nicht als diese MuPiBox verifiziert werden."
     }
   }
 }

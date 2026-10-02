@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0
+
+- Add automatic MuPiBox discovery through mDNS/Zeroconf (`_mupibox._tcp.local.`).
+- Use the persistent MuPiBox `box_id` as the stable identity for new setups.
+- Update stored host and port automatically when discovery sees an existing box at a new address.
+- Migrate existing URL-based config/entity/device identities to `box_id` without changing Home Assistant entity IDs or user customizations.
+- Add a discovery confirmation flow with optional Admin credentials.
+
 ## 0.1.1
 
 - Release workflow now waits for successful HACS and hassfest validation before publishing.

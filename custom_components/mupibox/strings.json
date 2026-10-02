@@ -17,6 +17,16 @@
           "use_ssl": "Enable only when MuPiBox is reached through an HTTPS reverse proxy.",
           "admin_password": "Leave empty if no admin password is configured or if Home Assistant should only use public player/status functions."
         }
+      },
+      "zeroconf_confirm": {
+        "title": "Discovered MuPiBox",
+        "description": "Home Assistant discovered {name} on your local network. Confirm to add it. The admin password is optional and only enables protected maintenance actions.",
+        "data": {
+          "admin_password": "Admin password (optional)"
+        },
+        "data_description": {
+          "admin_password": "Leave empty for normal player, TTS and status functions. Enter it if protected maintenance actions should also be available."
+        }
       }
     },
     "error": {
@@ -25,7 +35,8 @@
       "unknown": "Unexpected error while connecting to MuPiBox."
     },
     "abort": {
-      "already_configured": "This MuPiBox endpoint is already configured."
+      "already_configured": "This MuPiBox is already configured.",
+      "invalid_discovery": "The discovered service could not be verified as this MuPiBox."
     }
   }
 }

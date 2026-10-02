@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.1.1
+**Home Assistant integration version:** 0.2.0
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -38,7 +38,8 @@ Until this repository is included in the default HACS catalog:
 4. Select category **Integration**.
 5. Install **MuPiBox**.
 6. Restart Home Assistant.
-7. Go to **Settings → Devices & services → Add integration → MuPiBox**.
+7. MuPiBox devices advertising `_mupibox._tcp.local.` appear automatically under **Settings → Devices & services → Discovered**. Select **Configure** to add one.
+8. Manual setup through **Add integration → MuPiBox** remains available as a fallback.
 
 Updates are published from this repository. The Home Assistant integration uses its own release numbers and does not follow the MuPiBox-NG application version.
 
@@ -52,12 +53,16 @@ and restart Home Assistant.
 
 ## Configuration
 
-The config flow asks for:
+For automatically discovered boxes, the config flow already knows the host and API port and only asks for confirmation plus an optional Admin password.
+
+Manual setup asks for:
 
 - MuPiBox host or IP address
 - API port (default: `8090`)
 - HTTPS on/off
 - optional MuPiBox Admin password
+
+MuPiBox-NG 0.1.0-dev builds with discovery support advertise a persistent `box_id`. Home Assistant uses that identity instead of the IP address, so DHCP address changes do not create a second device.
 
 The Admin password is only required for protected maintenance functions such as library rescan, UI restart, reboot, shutdown and display screenshots when Admin protection is enabled.
 
