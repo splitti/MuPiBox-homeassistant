@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.4
+
+- Add clear translated names and icons for the two Home Assistant notification targets: display text and spoken announcement.
+- Keep notify entities as action targets; Home Assistant may show their state as `unknown` because notify entities intentionally have no persistent state.
+- Add documented compact and full native Home Assistant dashboard templates.
+
 ## 0.3.3
 
 - Fix the 0.3.2 release package by including the new Home Assistant `select` platform module required for selectable audio output.

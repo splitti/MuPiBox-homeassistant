@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.3.3
+**Home Assistant integration version:** 0.3.4
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -77,6 +77,16 @@ The Admin password is only required for protected maintenance functions such as 
 A compact, dependency-free two-view MuPiBox dashboard template is included in the repository. It uses only native Home Assistant cards and supports playback, selectable audio output routing, provider status, display preview, quick actions and a separate diagnostics view.
 
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) for requirements, entity mapping and installation, and [docs/dashboard-template.yaml](docs/dashboard-template.yaml) for the ready-to-copy template.
+
+## Dashboard templates
+
+Ready-to-use Home Assistant dashboard examples are available in [docs/DASHBOARD.md](docs/DASHBOARD.md):
+
+- a compact MuPiBox card for an existing dashboard
+- a full responsive Player + Diagnostics dashboard
+- direct Audio output selection for available local, Bluetooth, Sonos and Music Assistant targets
+
+The templates use **only built-in Home Assistant cards**. No Mushroom, Button Card, Card Mod, Mini Graph Card or ApexCharts dependency is required. Entity IDs are mapped explicitly so the examples can be adapted to any MuPiBox without assuming a particular box/area name.
 
 ## API documentation
 

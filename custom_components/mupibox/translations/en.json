@@ -71,6 +71,14 @@
       "audio_output": {
         "name": "Audio output"
       }
+    },
+    "notify": {
+      "display_message": {
+        "name": "Show text on display"
+      },
+      "tts_announcement": {
+        "name": "Speak announcement"
+      }
     }
   }
 }

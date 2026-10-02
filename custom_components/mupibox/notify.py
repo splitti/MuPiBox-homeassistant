@@ -27,7 +27,9 @@ async def async_setup_entry(
 class MuPiBoxDisplayMessageEntity(MuPiBoxEntity, NotifyEntity):
     """Show a transient message on the MuPiBox display."""
 
-    _attr_name = "Display message"
+    _attr_translation_key = "display_message"
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:message-text-outline"
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         super().__init__(entry, "display_message")
@@ -39,7 +41,9 @@ class MuPiBoxDisplayMessageEntity(MuPiBoxEntity, NotifyEntity):
 class MuPiBoxAnnouncementEntity(MuPiBoxEntity, NotifyEntity):
     """Use MuPiBox TTS for Home Assistant announcements."""
 
-    _attr_name = "TTS announcement"
+    _attr_translation_key = "tts_announcement"
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:account-voice"
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         # Keep the previous suffix for registry compatibility.

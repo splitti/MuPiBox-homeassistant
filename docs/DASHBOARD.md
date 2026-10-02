@@ -1,87 +1,397 @@
-# MuPiBox Home Assistant dashboard
+# MuPiBox dashboard templates
 
-This repository includes a compact two-view Home Assistant dashboard template for MuPiBox-NG:
-
-- **Control** — current media, cover, playback, output routing, battery/Wi-Fi, provider state, display preview and quick maintenance actions.
-- **Diagnostics** — CPU/RAM/storage, temperatures, MuPiHAT power data, network and software information.
+These examples are designed for the MuPiBox Home Assistant integration **0.3.3 or newer**.
 
 ## Dependencies
 
-### Required
+**Required**
 
-- Home Assistant **2026.9 or newer** (recommended/tested layout target)
-- MuPiBox Home Assistant integration **0.3.3 or newer**
-- A MuPiBox-NG build exposing the current Home Assistant, MuPiHAT, provider and output-target APIs
+- Home Assistant
+- MuPiBox Home Assistant integration
 
-### Additional HACS cards
+**No additional HACS dashboard cards are required.** The templates use only built-in Home Assistant cards and the modern `sections` view.
 
-**None.** The reference dashboard deliberately uses only Home Assistant built-in cards and the modern Sections layout. Mushroom, card-mod, button-card, ApexCharts and other custom frontend cards are **not required**.
+**Optional features**
 
-This keeps the template portable, theme-aware and less likely to break after Home Assistant frontend updates.
+- The display screenshot card needs the MuPiBox `camera` entity. If Admin protection is enabled on the box, the Home Assistant integration needs the Admin password for this protected endpoint.
+- Library rescan, UI restart, reboot and power-off buttons likewise require the Admin password when Admin protection is enabled.
 
-## Install the template
+The **Audio output** selector itself does not need an Admin password. Its choices are discovered dynamically from the box and can include the local MuPiBox output, paired Bluetooth devices, Sonos targets and Music Assistant targets.
 
-1. Add/configure your MuPiBox integration first and make sure its entities are available.
-2. Create an empty dashboard in Home Assistant.
-3. Open **Edit dashboard → Raw configuration editor**.
-4. Copy `docs/dashboard-template.yaml` into the editor.
-5. Replace every `REPLACE_*` entity ID with the matching entity from your own MuPiBox device.
+## Before pasting a template
 
-Do not edit Home Assistant `.storage` files directly.
+Home Assistant generates entity IDs from the device name and area, so entity IDs are intentionally **not assumed to be identical between boxes**.
 
-## Entity mapping
+Open **Settings → Devices & services → MuPiBox → your box** and copy the matching entity IDs. Replace the placeholders in the examples below.
 
-Use the entity names on the MuPiBox device page to find the IDs for your installation. Home Assistant entity IDs can contain the device name and/or area name, so they are intentionally not hard-coded in the published template.
+| Placeholder | MuPiBox entity |
+| --- | --- |
+| `MUPIBOX_PLAYER` | Media player (`Player`) |
+| `MUPIBOX_AUDIO_OUTPUT` | Select (`Audio output`) |
+| `MUPIBOX_BATTERY` | Battery sensor |
+| `MUPIBOX_WIFI_QUALITY` | Wi-Fi quality sensor |
+| `MUPIBOX_NETWORK` | Network reachable binary sensor |
+| `MUPIBOX_CHARGING` | Charging binary sensor |
+| `MUPIBOX_TTS_ENABLED` | Voice output enabled binary sensor |
+| `MUPIBOX_ACTIVE_PROVIDER` | Active provider sensor |
+| `MUPIBOX_SPOTIFY` | Spotify status sensor |
+| `MUPIBOX_MA` | Music Assistant status sensor |
+| `MUPIBOX_JELLYFIN` | Jellyfin status sensor |
+| `MUPIBOX_AUDIBLE` | Audible status sensor |
+| `MUPIBOX_SENDSPIN` | Sendspin status sensor |
+| `MUPIBOX_CPU` | CPU usage sensor |
+| `MUPIBOX_RAM` | RAM usage sensor |
+| `MUPIBOX_STORAGE` | Storage usage sensor |
+| `MUPIBOX_CPU_TEMP` | CPU temperature sensor |
+| `MUPIBOX_HAT_TEMP` | MuPiHAT temperature sensor |
+| `MUPIBOX_BATTERY_VOLTAGE` | Battery voltage sensor |
+| `MUPIBOX_EXTERNAL_POWER` | External power binary sensor |
+| `MUPIBOX_CAMERA` | Display camera |
+| `MUPIBOX_DISPLAY_NOTIFY` | Notify entity (`Show text on display` / `Text auf Display anzeigen`) |
+| `MUPIBOX_RESCAN` | Rescan media library button |
+| `MUPIBOX_RESTART_UI` | Restart interface button |
+| `MUPIBOX_REBOOT` | Restart box button |
+| `MUPIBOX_POWER_OFF` | Power off box button |
 
-| Placeholder | MuPiBox entity name |
-|---|---|
-| `REPLACE_PLAYER` | Player |
-| `REPLACE_AUDIO_OUTPUT` | Audio output / Audioausgabe |
-| `REPLACE_BATTERY` | Battery |
-| `REPLACE_WIFI_SIGNAL` | Wi-Fi signal |
-| `REPLACE_WIFI_QUALITY` | Wi-Fi quality |
-| `REPLACE_CHARGING` | Charging |
-| `REPLACE_NETWORK` | Network reachable |
-| `REPLACE_TTS_ENABLED` | Voice output enabled |
-| `REPLACE_ACTIVE_PROVIDER` | Active provider |
-| `REPLACE_TTS_PROVIDER` | TTS provider |
-| `REPLACE_SPOTIFY_STATUS` | Spotify status |
-| `REPLACE_MA_STATUS` | Music Assistant status |
-| `REPLACE_JELLYFIN_STATUS` | Jellyfin status |
-| `REPLACE_AUDIBLE_STATUS` | Audible status |
-| `REPLACE_SENDSPIN_STATUS` | Sendspin status |
-| `REPLACE_DISPLAY` | Display camera |
-| `REPLACE_RESCAN` | Rescan media library |
-| `REPLACE_RESTART_UI` | Restart interface |
-| `REPLACE_REBOOT` | Restart box |
-| `REPLACE_POWEROFF` | Power off box |
-| `REPLACE_CPU_USAGE` | CPU usage |
-| `REPLACE_CPU_TEMP` | CPU temperature |
-| `REPLACE_RAM_USAGE` | RAM usage |
-| `REPLACE_STORAGE_USAGE` | Storage usage |
-| `REPLACE_BATTERY_VOLTAGE` | Battery voltage |
-| `REPLACE_BATTERY_CURRENT` | Battery current |
-| `REPLACE_MUPIHAT_TEMP` | MuPiHAT temperature |
-| `REPLACE_EXTERNAL_POWER` | External power |
-| `REPLACE_MUPIHAT_AVAILABLE` | MuPiHAT available |
-| `REPLACE_VERSION` | Version |
+## Compact MuPiBox card
 
-## Audio output routing
+Use this inside an existing dashboard. It keeps playback, output routing and the most useful box status in one compact block.
 
-Integration 0.3.3+ exposes **Audio output** as a Home Assistant `select` entity instead of a read-only sensor. The options are populated dynamically from currently selectable MuPiBox output targets. Depending on the box this can include:
+```yaml
+type: grid
+columns: 1
+square: false
+cards:
+  - type: heading
+    heading: MuPiBox
+    icon: mdi:music-box
+    badges:
+      - type: entity
+        entity: MUPIBOX_BATTERY
+        show_state: true
+        color: state
+      - type: entity
+        entity: MUPIBOX_WIFI_QUALITY
+        show_state: true
+      - type: entity
+        entity: MUPIBOX_ACTIVE_PROVIDER
+        show_state: true
+  - type: media-control
+    entity: MUPIBOX_PLAYER
+    name: Wiedergabe
+  - type: tile
+    entity: MUPIBOX_AUDIO_OUTPUT
+    name: Audioausgabe
+    icon: mdi:speaker-multiple
+    features_position: inline
+    features:
+      - type: select-options
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: MUPIBOX_BATTERY
+        name: Akku
+        icon: mdi:battery
+      - type: tile
+        entity: MUPIBOX_NETWORK
+        name: Netzwerk
+        icon: mdi:lan-connect
+      - type: tile
+        entity: MUPIBOX_TTS_ENABLED
+        name: Sprachausgabe
+        icon: mdi:text-to-speech
+```
 
-- the MuPiBox itself
-- paired/available Bluetooth devices
-- Sonos targets
-- Music Assistant players
+## Full MuPiBox dashboard
 
-The dashboard uses the native `select-options` tile feature so routing can be changed directly without opening the device page.
+The full template uses two views: **Player** for everyday use and **Diagnostics** for hardware/system details. It stays responsive on phone, tablet and desktop by using Home Assistant's native sections layout.
 
-## Display messages and TTS
+```yaml
+views:
+  - title: MuPiBox
+    path: player
+    icon: mdi:music-box
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: MuPiBox
+            icon: mdi:music-box
+            badges:
+              - type: entity
+                entity: MUPIBOX_BATTERY
+                show_state: true
+                color: state
+              - type: entity
+                entity: MUPIBOX_WIFI_QUALITY
+                show_state: true
+              - type: entity
+                entity: MUPIBOX_ACTIVE_PROVIDER
+                show_state: true
+          - type: media-control
+            entity: MUPIBOX_PLAYER
+            name: Wiedergabe
+            grid_options:
+              columns: full
+              rows: 4
+          - type: tile
+            entity: MUPIBOX_AUDIO_OUTPUT
+            name: Audioausgabe
+            icon: mdi:speaker-multiple
+            features_position: inline
+            features:
+              - type: select-options
+            grid_options:
+              columns: full
+              rows: 2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Status
+            icon: mdi:heart-pulse
+          - type: tile
+            entity: MUPIBOX_BATTERY
+            name: Akku
+            icon: mdi:battery
+            features:
+              - type: bar-gauge
+                min: 0
+                max: 100
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: MUPIBOX_CHARGING
+            name: Lädt
+            icon: mdi:battery-charging
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: MUPIBOX_NETWORK
+            name: Netzwerk
+            icon: mdi:lan-connect
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: MUPIBOX_TTS_ENABLED
+            name: Sprachausgabe
+            icon: mdi:text-to-speech
+            grid_options:
+              columns: 6
+              rows: 2
+          - type: tile
+            entity: MUPIBOX_WIFI_QUALITY
+            name: WLAN
+            icon: mdi:wifi
+            features:
+              - type: bar-gauge
+                min: 0
+                max: 100
+            grid_options:
+              columns: full
+              rows: 2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Dienste
+            icon: mdi:connection
+          - type: tile
+            entity: MUPIBOX_SPOTIFY
+            name: Spotify
+            icon: mdi:spotify
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_MA
+            name: Music Assistant
+            icon: mdi:music-circle
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_JELLYFIN
+            name: Jellyfin
+            icon: mdi:jellyfish
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_AUDIBLE
+            name: Audible
+            icon: mdi:book-music
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_SENDSPIN
+            name: Sendspin
+            icon: mdi:cast-audio
+            grid_options: {columns: full, rows: 2}
+      - type: grid
+        cards:
+          - type: heading
+            heading: Schnellaktionen
+            icon: mdi:gesture-tap-button
+          - type: tile
+            entity: MUPIBOX_RESCAN
+            name: Medien neu einlesen
+            icon: mdi:database-refresh
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: MUPIBOX_RESCAN}
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_RESTART_UI
+            name: Oberfläche neu starten
+            icon: mdi:monitor-shimmer
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: MUPIBOX_RESTART_UI}
+              confirmation:
+                text: MuPiBox-Oberfläche neu starten?
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_REBOOT
+            name: Box neu starten
+            icon: mdi:restart
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: MUPIBOX_REBOOT}
+              confirmation:
+                text: MuPiBox wirklich neu starten?
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_POWER_OFF
+            name: Box ausschalten
+            icon: mdi:power
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: MUPIBOX_POWER_OFF}
+              confirmation:
+                text: MuPiBox wirklich ausschalten?
+            grid_options: {columns: 6, rows: 2}
 
-The integration also exposes two notify entities:
+  - title: Diagnose
+    path: diagnose
+    icon: mdi:chart-box-outline
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Leistung
+            icon: mdi:speedometer
+          - type: history-graph
+            title: Auslastung · letzte 6 Stunden
+            hours_to_show: 6
+            entities:
+              - entity: MUPIBOX_CPU
+                name: CPU
+              - entity: MUPIBOX_RAM
+                name: RAM
+              - entity: MUPIBOX_STORAGE
+                name: Speicher
+            grid_options: {columns: full, rows: 5}
+          - type: history-graph
+            title: Temperaturen · letzte 6 Stunden
+            hours_to_show: 6
+            entities:
+              - entity: MUPIBOX_CPU_TEMP
+                name: CPU
+              - entity: MUPIBOX_HAT_TEMP
+                name: MuPiHAT
+            grid_options: {columns: full, rows: 5}
+      - type: grid
+        cards:
+          - type: heading
+            heading: Hardware
+            icon: mdi:raspberry-pi
+          - type: tile
+            entity: MUPIBOX_BATTERY
+            name: Akku
+            icon: mdi:battery
+            features:
+              - type: bar-gauge
+                min: 0
+                max: 100
+            grid_options: {columns: full, rows: 2}
+          - type: tile
+            entity: MUPIBOX_BATTERY_VOLTAGE
+            name: Akkuspannung
+            icon: mdi:sine-wave
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_EXTERNAL_POWER
+            name: Netzteil
+            icon: mdi:power-plug
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_CPU_TEMP
+            name: CPU-Temperatur
+            icon: mdi:thermometer
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: MUPIBOX_HAT_TEMP
+            name: MuPiHAT
+            icon: mdi:thermometer-lines
+            grid_options: {columns: 6, rows: 2}
+      - type: grid
+        cards:
+          - type: heading
+            heading: Display
+            icon: mdi:monitor-eye
+          - type: picture-entity
+            entity: MUPIBOX_CAMERA
+            name: Live-Screenshot
+            show_state: false
+            show_name: true
+            camera_view: auto
+            grid_options: {columns: full, rows: 5}
+```
 
-- **Display message** — transient text on the MuPiBox touch display
-- **TTS announcement** — spoken message via the TTS provider configured on the box
+## Optional: direct message composer
 
-They are intentionally not wired to a fixed-message dashboard button in the base template, because the message text should be supplied by an automation, script, or user input rather than hard-coded. This keeps the reference dashboard dependency-free. A separate optional message-composer example can be built with native Home Assistant helpers if desired.
+Home Assistant `notify` entities are action targets and therefore do not have a persistent state. Home Assistant can show their state as `unknown`; this is expected and does not mean the MuPiBox is unavailable.
+
+For a convenient text box directly on a dashboard, create one native **Text helper** and one native **Script**. This adds no HACS card dependency.
+
+1. Create **Settings → Devices & services → Helpers → Create helper → Text**. Name it `MuPiBox Message` (or `MuPiBox Nachricht`).
+2. Create a script that calls `notify.send_message` and targets `MUPIBOX_DISPLAY_NOTIFY`. Use the Text helper's state as the message.
+3. Add the following native card to the dashboard:
+
+```yaml
+type: entities
+entities:
+  - entity: input_text.mupibox_message
+    name: Text
+  - entity: script.mupibox_send_message
+    name: Show on display
+    icon: mdi:send
+```
+
+Example script action (replace the two entity IDs with yours):
+
+```yaml
+action: notify.send_message
+target:
+  entity_id: MUPIBOX_DISPLAY_NOTIFY
+data:
+  title: Home Assistant
+  message: "{{ states('input_text.mupibox_message') }}"
+```
+
+The MuPiBox displays this as a transient overlay without interrupting playback. For spoken output, target the separate **Speak announcement** / **Sprachnachricht ausgeben** notify entity instead.
+
+### Notes
+
+- Remove cards for providers you do not use.
+- The Audio output dropdown only shows targets that the MuPiBox currently considers selectable and available. A paired Bluetooth device can therefore appear/disappear depending on reachability.
+- Provider status sensors deliberately expose only safe status/configuration information and never credentials.
+- `Playback engine` is a low-level diagnostic and is disabled by default; it is intentionally not part of these templates.
+- The dashboard does not require Card Mod, Mushroom, Button Card, Mini Graph Card or ApexCharts.
