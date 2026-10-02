@@ -72,6 +72,12 @@ MuPiBox-NG 0.1.0-dev builds with discovery support advertise a persistent `box_i
 
 The Admin password is only required for protected maintenance functions such as library rescan, UI restart, reboot, shutdown and display screenshots when Admin protection is enabled.
 
+## Dashboard template
+
+A compact, dependency-free two-view MuPiBox dashboard template is included in the repository. It uses only native Home Assistant cards and supports playback, selectable audio output routing, provider status, display preview, quick actions and a separate diagnostics view.
+
+See [docs/DASHBOARD.md](docs/DASHBOARD.md) for requirements, entity mapping and installation, and [docs/dashboard-template.yaml](docs/dashboard-template.yaml) for the ready-to-copy template.
+
 ## API documentation
 
 See [docs/API.md](docs/API.md) for the API mapping and examples used by the integration.
