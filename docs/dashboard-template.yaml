@@ -1,0 +1,344 @@
+views:
+  - title: MuPiBox
+    path: control
+    icon: mdi:music-note
+    type: sections
+    max_columns: 3
+    header:
+      layout: responsive
+      badges_position: bottom
+      badges_wrap: scroll
+      card:
+        type: markdown
+        text_only: true
+        content: >-
+          ## MuPiBox
+          **{{ state_attr('REPLACE_PLAYER','media_title') or 'Ready' }}**{% set artist = state_attr('REPLACE_PLAYER','media_artist') %}{% if artist %} · {{ artist }}{% endif %}
+    badges:
+      - type: entity
+        entity: REPLACE_BATTERY
+        show_name: false
+        show_state: true
+        color: pink
+      - type: entity
+        entity: REPLACE_WIFI_SIGNAL
+        show_name: false
+        show_state: true
+      - type: entity
+        entity: REPLACE_ACTIVE_PROVIDER
+        show_name: false
+        show_state: true
+        icon: mdi:music-circle
+      - type: entity
+        entity: REPLACE_NETWORK
+        show_name: false
+        show_state: false
+        color: state
+    sections:
+      - type: grid
+        column_span: 2
+        background:
+          color: '#ec4899'
+          opacity: 5
+        cards:
+          - type: heading
+            heading: Playback
+            heading_style: title
+            icon: mdi:play-circle
+          - type: media-control
+            entity: REPLACE_PLAYER
+            name: MuPiBox
+            grid_options:
+              columns: full
+              rows: 4
+          - type: tile
+            entity: REPLACE_AUDIO_OUTPUT
+            name: Audio output
+            icon: mdi:speaker-multiple
+            color: pink
+            features:
+              - type: select-options
+            features_position: inline
+            grid_options:
+              columns: 12
+              rows: auto
+          - type: tile
+            entity: REPLACE_ACTIVE_PROVIDER
+            name: Source
+            icon: mdi:access-point
+            color: pink
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: REPLACE_TTS_PROVIDER
+            name: Voice
+            icon: mdi:account-voice
+            grid_options:
+              columns: 6
+              rows: 1
+
+      - type: grid
+        background:
+          color: '#ec4899'
+          opacity: 3
+        cards:
+          - type: heading
+            heading: Box
+            heading_style: title
+            icon: mdi:music-box
+          - type: tile
+            entity: REPLACE_BATTERY
+            name: Battery
+            color: pink
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: REPLACE_WIFI_QUALITY
+            name: Wi-Fi
+            icon: mdi:wifi
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: REPLACE_CHARGING
+            name: Charging
+            icon: mdi:battery-charging
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: REPLACE_TTS_ENABLED
+            name: Voice output
+            icon: mdi:account-voice
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: picture-entity
+            entity: REPLACE_DISPLAY
+            name: Display
+            camera_view: auto
+            show_state: false
+            show_name: true
+            grid_options:
+              columns: full
+              rows: 4
+
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Providers
+            heading_style: title
+            icon: mdi:cloud-music
+          - type: tile
+            entity: REPLACE_SPOTIFY_STATUS
+            name: Spotify
+            icon: mdi:spotify
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_MA_STATUS
+            name: Music Assistant
+            icon: mdi:music-box-multiple
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_JELLYFIN_STATUS
+            name: Jellyfin
+            icon: mdi:jellyfish
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_AUDIBLE_STATUS
+            name: Audible
+            icon: mdi:book-open-variant
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_SENDSPIN_STATUS
+            name: Sendspin
+            icon: mdi:broadcast
+            grid_options: {columns: 6, rows: 1}
+
+      - type: grid
+        background:
+          color: '#ec4899'
+          opacity: 3
+        cards:
+          - type: heading
+            heading: Quick actions
+            heading_style: title
+            icon: mdi:gesture-tap-button
+          - type: button
+            entity: REPLACE_RESCAN
+            name: Rescan media
+            icon: mdi:database-refresh
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: REPLACE_RESCAN}
+            grid_options: {columns: 6, rows: 2}
+          - type: button
+            entity: REPLACE_RESTART_UI
+            name: Restart interface
+            icon: mdi:monitor-shimmer
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: REPLACE_RESTART_UI}
+              confirmation:
+                text: Restart the MuPiBox interface?
+            grid_options: {columns: 6, rows: 2}
+          - type: button
+            entity: REPLACE_REBOOT
+            name: Restart box
+            icon: mdi:restart
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: REPLACE_REBOOT}
+              confirmation:
+                text: Really restart the MuPiBox?
+            grid_options: {columns: 6, rows: 2}
+          - type: button
+            entity: REPLACE_POWEROFF
+            name: Power off
+            icon: mdi:power
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target: {entity_id: REPLACE_POWEROFF}
+              confirmation:
+                text: Really power off the MuPiBox?
+            grid_options: {columns: 6, rows: 2}
+
+  - title: Diagnostics
+    path: diagnostics
+    icon: mdi:chart-line
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Performance
+            heading_style: title
+            icon: mdi:speedometer
+          - type: tile
+            entity: REPLACE_CPU_USAGE
+            name: CPU
+            icon: mdi:cpu-64-bit
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: REPLACE_RAM_USAGE
+            name: RAM
+            icon: mdi:memory
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: REPLACE_STORAGE_USAGE
+            name: Storage
+            icon: mdi:harddisk
+            features:
+              - type: bar-gauge
+                min: 0
+                max: 100
+            grid_options: {columns: 6, rows: 2}
+          - type: tile
+            entity: REPLACE_CPU_TEMP
+            name: CPU temperature
+            icon: mdi:thermometer
+            features:
+              - type: trend-graph
+                hours_to_show: 6
+            grid_options: {columns: 6, rows: 2}
+          - type: history-graph
+            title: System · 24 hours
+            hours_to_show: 24
+            entities:
+              - entity: REPLACE_CPU_USAGE
+                name: CPU
+              - entity: REPLACE_RAM_USAGE
+                name: RAM
+              - entity: REPLACE_STORAGE_USAGE
+                name: Storage
+            grid_options:
+              columns: full
+              rows: 5
+
+      - type: grid
+        background:
+          color: '#ec4899'
+          opacity: 3
+        cards:
+          - type: heading
+            heading: MuPiHAT & battery
+            heading_style: title
+            icon: mdi:battery-heart
+          - type: tile
+            entity: REPLACE_BATTERY
+            name: Battery
+            color: pink
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_BATTERY_VOLTAGE
+            name: Voltage
+            icon: mdi:flash
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_BATTERY_CURRENT
+            name: Current
+            icon: mdi:current-dc
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_MUPIHAT_TEMP
+            name: MuPiHAT
+            icon: mdi:thermometer
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_EXTERNAL_POWER
+            name: External power
+            icon: mdi:power-plug
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_MUPIHAT_AVAILABLE
+            name: MuPiHAT
+            icon: mdi:chip
+            grid_options: {columns: 6, rows: 1}
+
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Network & software
+            heading_style: title
+            icon: mdi:lan
+          - type: tile
+            entity: REPLACE_WIFI_SIGNAL
+            name: Wi-Fi signal
+            icon: mdi:wifi
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_WIFI_QUALITY
+            name: Wi-Fi quality
+            icon: mdi:wifi-strength-4
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_NETWORK
+            name: Network reachable
+            icon: mdi:lan-connect
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_VERSION
+            name: MuPiBox version
+            icon: mdi:tag-outline
+            grid_options: {columns: 6, rows: 1}
+          - type: tile
+            entity: REPLACE_TTS_PROVIDER
+            name: TTS provider
+            icon: mdi:account-voice
+            grid_options: {columns: 6, rows: 1}
