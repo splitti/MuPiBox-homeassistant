@@ -213,6 +213,36 @@ class MuPiBoxApiClient:
     async def async_get_system(self) -> dict[str, Any]:
         return await self.async_request_json("GET", "/api/system")  # type: ignore[return-value]
 
+    async def async_get_system_metrics(self) -> dict[str, Any]:
+        """Return lightweight CPU/RAM/storage diagnostics when supported."""
+        try:
+            result = await self.async_request_json("GET", "/api/system/metrics")
+        except MuPiBoxApiError as err:
+            if err.status == HTTPStatus.NOT_FOUND:
+                return {}
+            raise
+        return result if isinstance(result, dict) else {}
+
+    async def async_get_mupihat_status(self) -> dict[str, Any]:
+        """Return MuPiHAT telemetry when supported by the box."""
+        try:
+            result = await self.async_request_json("GET", "/api/mupihat/status")
+        except MuPiBoxApiError as err:
+            if err.status == HTTPStatus.NOT_FOUND:
+                return {}
+            raise
+        return result if isinstance(result, dict) else {}
+
+    async def async_get_provider_status(self) -> dict[str, Any]:
+        """Return safe provider connectivity summaries."""
+        try:
+            result = await self.async_request_json("GET", "/api/providers/status", timeout=12)
+        except MuPiBoxApiError as err:
+            if err.status == HTTPStatus.NOT_FOUND:
+                return {}
+            raise
+        return result if isinstance(result, dict) else {}
+
     async def async_get_library(self) -> list[dict[str, Any]]:
         result = await self.async_request_json("GET", "/api/library")
         return result if isinstance(result, list) else []
@@ -232,10 +262,21 @@ class MuPiBoxApiClient:
         result = await self.async_request_json("POST", "/api/command", json_data=payload)
         return result if isinstance(result, dict) else {}
 
-    async def async_spotify_command(self, action: str, value: int | None = None) -> dict[str, Any]:
+    async def async_spotify_command(
+        self,
+        action: str,
+        value: int | None = None,
+        *,
+        uri: str | None = None,
+        skip_to_uri: str | None = None,
+    ) -> dict[str, Any]:
         payload: dict[str, Any] = {"action": action}
         if value is not None:
             payload["value"] = int(value)
+        if uri:
+            payload["uri"] = uri
+        if skip_to_uri:
+            payload["skip_to_uri"] = skip_to_uri
         result = await self.async_request_json("POST", "/api/spotify/command", json_data=payload)
         return result if isinstance(result, dict) else {}
 
@@ -249,6 +290,25 @@ class MuPiBoxApiClient:
                 "text": text,
             },
             timeout=25,
+        )
+        return result if isinstance(result, dict) else {}
+
+    async def async_show_message(
+        self,
+        message: str,
+        *,
+        title: str | None = None,
+        duration_ms: int = 8000,
+    ) -> dict[str, Any]:
+        """Show a transient message on the MuPiBox touch display."""
+        result = await self.async_request_json(
+            "POST",
+            "/api/message",
+            json_data={
+                "message": message,
+                "title": title or "",
+                "duration_ms": int(duration_ms),
+            },
         )
         return result if isinstance(result, dict) else {}
 

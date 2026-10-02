@@ -5,22 +5,26 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.2.1
+**Home Assistant integration version:** 0.3.0
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
 ## Features
 
-- Local media player with play, pause, stop, previous/next, seek and volume
-- Home Assistant media browser for local MuPiBox media
-- Separate Spotify Connect media player with transport, seek and volume control
-- TTS announcements through a Home Assistant notify entity
-- Battery, Wi-Fi, connectivity and diagnostic sensors
+- One provider-neutral MuPiBox media player for local media, radio, podcasts, ARD Sounds, Audible and Spotify
+- Automatic routing of play/pause/next/previous/seek/volume to the currently active playback backend
+- Home Assistant media browser for the MuPiBox local library plus direct `spotify:` URI playback
+- Display messages on the MuPiBox touch screen through a Home Assistant notify entity
+- TTS announcements through a separate notify entity
+- Live MuPiHAT battery percentage, voltage, current, charging/external-power and temperature diagnostics
+- Wi-Fi/network diagnostics including signal, quality, interface and IP address
+- CPU, RAM, storage and CPU-temperature diagnostics
+- Active playback-provider sensor and provider status for Spotify, Music Assistant, Jellyfin, Audible and Sendspin
 - Library rescan and UI restart controls
 - Reboot and power-off controls with optional MuPiBox Admin authentication
 - MuPiBox display screenshot camera
 
-Local playback and Spotify are exposed as separate media-player entities and have separate volume controls.
+The integration exposes the physical MuPiBox as **one media player**. Spotify is no longer represented as a second speaker entity; the box itself decides which backend is active and Home Assistant follows that state.
 
 ## Requirements
 

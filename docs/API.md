@@ -2,7 +2,7 @@
 
 MuPiBox exposes a local HTTP API on port `8090` by default. The Home Assistant custom integration in `custom_components/mupibox` maps the stable player/status endpoints to native Home Assistant devices and entities.
 
-The integration uses **local polling**. Player, system and Spotify state are polled every 5 seconds. The local library is refreshed at most once per minute and static information such as the software version less frequently.
+The integration uses **local polling**. Player, system, Spotify and MuPiHAT state are polled every 5 seconds. Lightweight CPU/RAM/storage metrics are refreshed every 10 seconds, provider connectivity summaries every 30 seconds, the local library at most once per minute and static information such as the software version less frequently.
 
 ## Installation
 
@@ -29,13 +29,16 @@ One Home Assistant device is created per configured MuPiBox.
 
 | Entity | Purpose | MuPiBox API |
 | --- | --- | --- |
-| `media_player` Local Player | Local files: play/pause/stop, previous/next, seek, volume, media browser | `GET /api/status`, `GET /api/library`, `POST /api/command` |
-| `media_player` Spotify Connect | Spotify Connect status and transport/volume control | `GET /api/spotify/status`, `POST /api/spotify/command` |
-| `notify` Announcements | Local Piper TTS announcement on the box | `POST /api/speak` |
+| `media_player` Player | One logical box player; automatically follows local/streamed playback or Spotify | `GET /api/status`, `GET /api/spotify/status`, `POST /api/command`, `POST /api/spotify/command` |
+| `notify` Display message | Show a transient text message on the touch display | `POST /api/message` |
+| `notify` TTS announcement | Speak text using the globally configured MuPiBox TTS engine | `POST /api/speak` |
 | `camera` Display | Current display screenshot on demand | `GET /api/admin/screenshot` |
-| Battery sensor | MuPiHAT/system battery percentage when available | `GET /api/system` |
-| Wi-Fi signal/quality | RSSI, quality and interface | `GET /api/system` |
-| Version / audio backend | Diagnostics | `GET /api/info`, `GET /api/status` |
+| Battery / MuPiHAT sensors | Battery %, voltage/current, charging, external power and HAT temperature | `GET /api/mupihat/status` |
+| Wi-Fi signal/quality | RSSI, quality, interface and IPv4 address | `GET /api/system` |
+| CPU/RAM/storage/temperature | Lightweight system diagnostics | `GET /api/system/metrics` |
+| Active provider | Current playback source (`local`, `spotify`, `radio`, `podcast`, etc.) | `GET /api/status`, `GET /api/spotify/status` |
+| Provider status | Spotify, Music Assistant, Jellyfin, Audible and Sendspin connection/configuration state | `GET /api/providers/status` |
+| Version / audio backend / TTS provider | Diagnostics | `GET /api/info`, `GET /api/status` |
 | Network/Wi-Fi/Spotify/TTS binary sensors | Connectivity and feature state | `GET /api/system`, `/api/spotify/status`, `/api/info` |
 | Rescan library button | Re-read local media | `POST /api/admin/library/rescan` |
 | Restart UI button | Trigger the native UI restart generation | `POST /api/admin/ui/restart` |
@@ -43,19 +46,33 @@ One Home Assistant device is created per configured MuPiBox.
 
 If an admin password is enabled on the MuPiBox but not stored in the Home Assistant config entry, normal playback, status and TTS remain available; protected maintenance buttons are unavailable.
 
-## TTS from Home Assistant
+## Messages and TTS from Home Assistant
 
-The integration creates a **Notify entity**. Use the normal Home Assistant `notify.send_message` action and target the MuPiBox Announcements entity.
+The integration creates two **Notify entities**. `Display message` shows text on the MuPiBox touch screen without interrupting playback. `TTS announcement` speaks the text using the box's configured TTS provider.
 
 Example automation action:
 
 ```yaml
 action: notify.send_message
 target:
-  entity_id: notify.mupibox_announcements
+  entity_id: notify.mupibox_tts_announcement
 data:
   message: "Essen ist fertig."
 ```
+
+
+Display-only example:
+
+```yaml
+action: notify.send_message
+target:
+  entity_id: notify.mupibox_display_message
+data:
+  title: "Home Assistant"
+  message: "Essen ist fertig."
+```
+
+`POST /api/message` feeds the native transient-message overlay already used by the touch UI. Messages expire automatically and are not stored as a history on the box.
 
 `POST /api/speak` intentionally pauses currently playing local audio and Spotify before the announcement. MuPiBox currently does not automatically resume the previous source afterwards.
 
@@ -113,8 +130,12 @@ The Home Assistant integration performs this login itself and keeps the returned
 | --- | --- | --- |
 | GET | `/api/health` | Liveness and MuPiBox version |
 | GET | `/api/info` | Version, persistent `box_id`, simulation flag, audio backend, TTS/power/display/theme summary |
-| GET | `/api/system` | Network, Wi-Fi RSSI/quality and battery state |
-| GET | `/api/ui-state` | UI restart generation |
+| GET | `/api/system` | Network and Wi-Fi RSSI/quality state |
+| GET | `/api/system/metrics` | CPU, RAM, storage, load, temperature and uptime metrics |
+| GET | `/api/mupihat/status` | MuPiHAT battery/power/temperature telemetry |
+| GET | `/api/providers/status` | Safe provider configuration/connectivity summary without credentials |
+| GET | `/api/ui-state` | UI restart generation plus a currently active transient message |
+| POST | `/api/message` | Show a transient message on the native touch UI |
 | GET | `/api/home` | Data-driven categories, rows and normalized items |
 | GET | `/api/library` | Local folders, tracks, stable IDs and cover URLs |
 | GET | `/api/cover/{id}` | Cover image for a local folder |

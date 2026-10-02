@@ -18,6 +18,8 @@ from .const import (
     DOMAIN,
     INFO_UPDATE_INTERVAL_SECONDS,
     LIBRARY_UPDATE_INTERVAL_SECONDS,
+    METRICS_UPDATE_INTERVAL_SECONDS,
+    PROVIDER_UPDATE_INTERVAL_SECONDS,
     UPDATE_INTERVAL,
 )
 
@@ -31,6 +33,9 @@ class MuPiBoxData:
     status: dict[str, Any] = field(default_factory=dict)
     system: dict[str, Any] = field(default_factory=dict)
     spotify: dict[str, Any] = field(default_factory=dict)
+    mupihat: dict[str, Any] = field(default_factory=dict)
+    providers: dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
     info: dict[str, Any] = field(default_factory=dict)
     auth: dict[str, Any] = field(default_factory=dict)
     library: list[dict[str, Any]] = field(default_factory=list)
@@ -57,6 +62,8 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
         self._last_library = 0.0
         self._last_info = 0.0
         self._last_auth = 0.0
+        self._last_providers = 0.0
+        self._last_metrics = 0.0
 
     async def _async_update_data(self) -> MuPiBoxData:
         now = time.monotonic()
@@ -64,9 +71,26 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             status_task = self.api.async_get_status()
             system_task = self.api.async_get_system()
             spotify_task = self.api.async_get_spotify_status()
-            status, system, spotify = await asyncio.gather(
-                status_task, system_task, spotify_task
+            mupihat_task = self.api.async_get_mupihat_status()
+            status, system, spotify, mupihat = await asyncio.gather(
+                status_task, system_task, spotify_task, mupihat_task
             )
+
+            metrics = self._cached.metrics
+            if not metrics or now - self._last_metrics >= METRICS_UPDATE_INTERVAL_SECONDS:
+                try:
+                    metrics = await self.api.async_get_system_metrics()
+                    self._last_metrics = now
+                except MuPiBoxApiError as err:
+                    _LOGGER.debug("Could not refresh optional system metrics: %s", err)
+
+            providers = self._cached.providers
+            if not providers or now - self._last_providers >= PROVIDER_UPDATE_INTERVAL_SECONDS:
+                try:
+                    providers = await self.api.async_get_provider_status()
+                    self._last_providers = now
+                except MuPiBoxApiError as err:
+                    _LOGGER.debug("Could not refresh optional provider status: %s", err)
 
             info = self._cached.info
             if not info or now - self._last_info >= INFO_UPDATE_INTERVAL_SECONDS:
@@ -90,6 +114,9 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             status=status,
             system=system,
             spotify=spotify,
+            mupihat=mupihat,
+            providers=providers,
+            metrics=metrics,
             info=info,
             auth=auth,
             library=library,

@@ -1,4 +1,4 @@
-"""TTS announcement entity for MuPiBox-NG."""
+"""Notification entities for MuPiBox-NG."""
 
 from __future__ import annotations
 
@@ -15,16 +15,34 @@ async def async_setup_entry(
     entry: MuPiBoxConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the MuPiBox announcement notify entity."""
-    async_add_entities([MuPiBoxAnnouncementEntity(entry)])
+    """Set up MuPiBox notification entities."""
+    async_add_entities(
+        [
+            MuPiBoxDisplayMessageEntity(entry),
+            MuPiBoxAnnouncementEntity(entry),
+        ]
+    )
+
+
+class MuPiBoxDisplayMessageEntity(MuPiBoxEntity, NotifyEntity):
+    """Show a transient message on the MuPiBox display."""
+
+    _attr_name = "Display message"
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "display_message")
+
+    async def async_send_message(self, message: str, title: str | None = None) -> None:
+        await self.api.async_show_message(message, title=title)
 
 
 class MuPiBoxAnnouncementEntity(MuPiBoxEntity, NotifyEntity):
-    """Use MuPiBox local TTS for Home Assistant announcements."""
+    """Use MuPiBox TTS for Home Assistant announcements."""
 
-    _attr_name = "Announcements"
+    _attr_name = "TTS announcement"
 
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        # Keep the previous suffix for registry compatibility.
         super().__init__(entry, "announcements")
 
     async def async_send_message(self, message: str, title: str | None = None) -> None:

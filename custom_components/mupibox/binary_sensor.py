@@ -25,6 +25,8 @@ async def async_setup_entry(
             MuPiBoxOnlineBinarySensor(entry),
             MuPiBoxWiFiBinarySensor(entry),
             MuPiBoxChargingBinarySensor(entry),
+            MuPiBoxExternalPowerBinarySensor(entry),
+            MuPiBoxMuPiHATHardwareBinarySensor(entry),
             MuPiBoxSpotifyBinarySensor(entry),
             MuPiBoxTTSBinarySensor(entry),
         ]
@@ -66,13 +68,53 @@ class MuPiBoxChargingBinarySensor(MuPiBoxEntity, BinarySensorEntity):
 
     @property
     def available(self) -> bool:
+        hat = self.coordinator.data.mupihat
+        if hat:
+            return super().available and bool(hat.get("battery_present"))
         return super().available and bool(
             self.coordinator.data.system.get("battery", {}).get("available")
         )
 
     @property
     def is_on(self) -> bool:
+        hat = self.coordinator.data.mupihat
+        if hat:
+            return bool(hat.get("charging"))
         return bool(self.coordinator.data.system.get("battery", {}).get("charging"))
+
+
+class MuPiBoxExternalPowerBinarySensor(MuPiBoxEntity, BinarySensorEntity):
+    _attr_name = "External power"
+    _attr_device_class = BinarySensorDeviceClass.PLUG
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "external_power")
+
+    @property
+    def available(self) -> bool:
+        return super().available and bool(self.coordinator.data.mupihat.get("hardware_available"))
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.data.mupihat.get("external_power"))
+
+
+class MuPiBoxMuPiHATHardwareBinarySensor(MuPiBoxEntity, BinarySensorEntity):
+    _attr_name = "MuPiHAT available"
+    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "mupihat_available")
+
+    @property
+    def available(self) -> bool:
+        return super().available and bool(self.coordinator.data.mupihat)
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.coordinator.data.mupihat.get("hardware_available"))
 
 
 class MuPiBoxSpotifyBinarySensor(MuPiBoxEntity, BinarySensorEntity):

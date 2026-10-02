@@ -87,6 +87,15 @@ def _migrate_registry_identity(
     return True
 
 
+def _remove_obsolete_entities(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> None:
+    """Remove entities retired by the provider-neutral player model."""
+    entity_reg = er.async_get(hass)
+    for entity in list(er.async_entries_for_config_entry(entity_reg, entry.entry_id)):
+        if entity.unique_id.endswith("_spotify_connect"):
+            entity_reg.async_remove(entity.entity_id)
+            _LOGGER.info("Removed obsolete separate Spotify media player %s", entity.entity_id)
+
+
 def _migrate_config_entry_identity(
     hass: HomeAssistant,
     entry: MuPiBoxConfigEntry,
@@ -130,6 +139,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> b
     await coordinator.async_config_entry_first_refresh()
 
     _migrate_config_entry_identity(hass, entry, coordinator.data.info)
+    _remove_obsolete_entities(hass, entry)
 
     entry.runtime_data = MuPiBoxRuntimeData(api=api, coordinator=coordinator)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

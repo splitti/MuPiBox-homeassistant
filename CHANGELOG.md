@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+- Replace the separate Local Player and Spotify Connect entities with one provider-neutral MuPiBox media player while preserving the existing local-player registry identity.
+- Remove the obsolete separate Spotify media-player registry entry during setup.
+- Read battery percentage and charging state from the current MuPiHAT telemetry endpoint, with fallback for older boxes.
+- Add MuPiHAT voltage, current, temperature, hardware and external-power diagnostics.
+- Add CPU, RAM, storage and CPU-temperature diagnostics from the current MuPiBox system metrics API.
+- Add an active-provider sensor and provider status sensors for Spotify, Music Assistant, Jellyfin, Audible and Sendspin.
+- Add a display-message notify entity in addition to the existing TTS announcement entity.
+- Keep provider/metrics endpoints optional so older MuPiBox builds continue to load with reduced diagnostics.
+
 ## 0.2.1
 
 - Replace the legacy Home Assistant branding with the current MuPiBox-NG icon used by the box UI.
