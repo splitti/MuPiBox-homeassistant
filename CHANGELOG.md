@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Replace the legacy Home Assistant branding with the current MuPiBox-NG icon used by the box UI.
+
 ## 0.2.0
 
 - Add automatic MuPiBox discovery through mDNS/Zeroconf (`_mupibox._tcp.local.`).
