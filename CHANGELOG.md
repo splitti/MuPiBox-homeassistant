@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3
+
+- Fix the 0.3.2 release package by including the new Home Assistant `select` platform module required for selectable audio output.
+
 ## 0.3.2
 
 - Replace the read-only Audio output sensor with a selectable Home Assistant Audio output entity.
