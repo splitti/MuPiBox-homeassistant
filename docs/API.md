@@ -38,7 +38,8 @@ One Home Assistant device is created per configured MuPiBox.
 | CPU/RAM/storage/temperature | Lightweight system diagnostics | `GET /api/system/metrics` |
 | Active provider | Current playback source (`local`, `spotify`, `radio`, `podcast`, etc.) | `GET /api/status`, `GET /api/spotify/status` |
 | Provider status | Spotify, Music Assistant, Jellyfin, Audible and Sendspin connection/configuration state | `GET /api/providers/status` |
-| Version / audio backend / TTS provider | Diagnostics | `GET /api/info`, `GET /api/status` |
+| Version / playback engine / TTS provider | Diagnostics | `GET /api/info`, `GET /api/status` |
+| Audio output | Currently active local/Bluetooth/Sonos/Music Assistant output target | `GET /api/output-targets` |
 | Network/Wi-Fi/Spotify/TTS binary sensors | Connectivity and feature state | `GET /api/system`, `/api/spotify/status`, `/api/info` |
 | Rescan library button | Re-read local media | `POST /api/admin/library/rescan` |
 | Restart UI button | Trigger the native UI restart generation | `POST /api/admin/ui/restart` |

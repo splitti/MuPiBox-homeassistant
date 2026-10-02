@@ -233,6 +233,16 @@ class MuPiBoxApiClient:
             raise
         return result if isinstance(result, dict) else {}
 
+    async def async_get_output_targets(self) -> dict[str, Any]:
+        """Return available output targets and the active route."""
+        try:
+            result = await self.async_request_json("GET", "/api/output-targets", timeout=10)
+        except MuPiBoxApiError as err:
+            if err.status == HTTPStatus.NOT_FOUND:
+                return {}
+            raise
+        return result if isinstance(result, dict) else {}
+
     async def async_get_provider_status(self) -> dict[str, Any]:
         """Return safe provider connectivity summaries."""
         try:

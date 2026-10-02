@@ -35,6 +35,7 @@ class MuPiBoxData:
     spotify: dict[str, Any] = field(default_factory=dict)
     mupihat: dict[str, Any] = field(default_factory=dict)
     providers: dict[str, Any] = field(default_factory=dict)
+    output_targets: dict[str, Any] = field(default_factory=dict)
     metrics: dict[str, Any] = field(default_factory=dict)
     info: dict[str, Any] = field(default_factory=dict)
     auth: dict[str, Any] = field(default_factory=dict)
@@ -76,6 +77,12 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
                 status_task, system_task, spotify_task, mupihat_task
             )
 
+            output_targets = self._cached.output_targets
+            try:
+                output_targets = await self.api.async_get_output_targets()
+            except MuPiBoxApiError as err:
+                _LOGGER.debug("Could not refresh optional output targets: %s", err)
+
             metrics = self._cached.metrics
             if not metrics or now - self._last_metrics >= METRICS_UPDATE_INTERVAL_SECONDS:
                 try:
@@ -116,6 +123,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             spotify=spotify,
             mupihat=mupihat,
             providers=providers,
+            output_targets=output_targets,
             metrics=metrics,
             info=info,
             auth=auth,

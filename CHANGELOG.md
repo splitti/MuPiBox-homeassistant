@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- Rename the misleading `Audio backend` diagnostic to `Playback engine`; `mpv` describes the player engine, not the Linux audio stack.
+- Add a separate `Audio output` sensor showing the currently selected MuPiBox output target such as local output, Bluetooth, Sonos or Music Assistant.
+- Preserve the old backend sensor unique ID so existing Home Assistant customizations and automations are not recreated.
+
 ## 0.3.0
 
 - Replace the separate Local Player and Spotify Connect entities with one provider-neutral MuPiBox media player while preserving the existing local-player registry identity.
