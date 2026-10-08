@@ -3,21 +3,15 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to MuPiBox",
-        "description": "Connect Home Assistant to the local MuPiBox API. The admin password is optional and is only needed for protected maintenance actions such as rescan, restart, reboot and power off.",
+        "title": "Connect MuPiBox securely",
+        "description": "New connections use HTTPS and secure API v1 with a display pairing code only.",
         "data": {
           "host": "Host or IP address",
-          "port": "API port",
-          "use_ssl": "Use HTTPS",
-          "admin_password": "Admin password (optional)",
-          "connection_type": "Connection type"
+          "port": "HTTPS port"
         },
         "data_description": {
-          "host": "Hostname or IP address without http:// or https://.",
-          "port": "MuPiBox listens on port 8090 by default.",
-          "use_ssl": "Enable only when MuPiBox is reached through an HTTPS reverse proxy.",
-          "admin_password": "Leave empty if no admin password is configured or if Home Assistant should only use public player/status functions.",
-          "connection_type": "Legacy NG or secure common API v1 for Classic/NG."
+          "host": "MuPiBox hostname or IP without https://.",
+          "port": "Default: 8443."
         }
       },
       "zeroconf_confirm": {
@@ -61,7 +55,8 @@
       "already_configured": "This MuPiBox is already configured.",
       "invalid_discovery": "The discovered service could not be verified as this MuPiBox.",
       "classic_pairing_not_supported": "Classic was discovered but pairing is not supported yet. Existing NG installations remain unchanged.",
-      "cannot_connect": "Cannot connect to the box."
+      "cannot_connect": "Cannot connect to the box.",
+      "legacy_pairing_retired": "Legacy pairing has been retired. Connect through secure API v1 (HTTPS, port 8443)."
     }
   },
   "entity": {

@@ -3,21 +3,15 @@
   "config": {
     "step": {
       "user": {
-        "title": "Mit MuPiBox verbinden",
-        "description": "Verbindet Home Assistant mit der lokalen MuPiBox-API. Das Admin-Passwort ist optional und wird nur für geschützte Wartungsaktionen wie Bibliothek neu einlesen, UI-Neustart, Reboot und Ausschalten benötigt.",
+        "title": "MuPiBox sicher verbinden",
+        "description": "Neue Verbindungen nutzen ausschließlich HTTPS und die sichere API v1 mit Display-Code.",
         "data": {
-          "host": "Host oder IP-Adresse",
-          "port": "API-Port",
-          "use_ssl": "HTTPS verwenden",
-          "admin_password": "Admin-Passwort (optional)",
-          "connection_type": "Verbindungstyp"
+          "host": "Hostname oder IP-Adresse",
+          "port": "HTTPS-Port"
         },
         "data_description": {
-          "host": "Hostname oder IP-Adresse ohne http:// oder https://.",
-          "port": "MuPiBox verwendet standardmäßig Port 8090.",
-          "use_ssl": "Nur aktivieren, wenn MuPiBox über einen HTTPS-Reverse-Proxy erreichbar ist.",
-          "admin_password": "Leer lassen, wenn kein Admin-Passwort gesetzt ist oder Home Assistant nur die öffentlichen Player-/Statusfunktionen verwenden soll.",
-          "connection_type": "Legacy-NG oder sichere gemeinsame API v1 für Classic/NG."
+          "host": "Adresse der MuPiBox ohne https://.",
+          "port": "Standard: 8443."
         }
       },
       "zeroconf_confirm": {
@@ -61,7 +55,8 @@
       "already_configured": "Diese MuPiBox ist bereits eingerichtet.",
       "invalid_discovery": "Der gefundene Dienst konnte nicht als diese MuPiBox verifiziert werden.",
       "classic_pairing_not_supported": "Classic erkannt. Die Kopplung wird noch nicht unterstützt. Bestehende NG-Installationen bleiben unverändert.",
-      "cannot_connect": "Die Box ist nicht erreichbar."
+      "cannot_connect": "Die Box ist nicht erreichbar.",
+      "legacy_pairing_retired": "Der alte Kopplungsweg wurde abgeschaltet. Bitte die sichere API v1 (HTTPS, Port 8443) verwenden."
     }
   },
   "entity": {

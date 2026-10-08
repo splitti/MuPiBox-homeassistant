@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.0
+**Home Assistant integration version:** 0.4.1
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -126,3 +126,7 @@ entities, including notifications and maintenance controls, remain unchanged.
 
 See docs/classic-api-contract.md for the full protocol, wire schemas,
 security requirements and acceptance tests.
+
+## New connections from 0.4.1
+
+Only HTTPS API v1 pairing is offered for NEW setups. Remove an old NG legacy configuration entry in Home Assistant before re-pairing the same physical box; the stable device ID intentionally prevents duplicates. Back up automations/dashboard entity IDs first. The legacy HTTP API remains available locally for MuPiBox components, and already configured HA legacy entries are not automatically deleted.

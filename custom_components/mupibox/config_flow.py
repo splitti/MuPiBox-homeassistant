@@ -100,7 +100,7 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle setup initiated by the user."""
         errors: dict[str, str] = {}
 
-        if user_input is not None and user_input.get("connection_type") == "secure_v1":
+        if user_input is not None:
             host = str(user_input[CONF_HOST]).strip()
             port = int(user_input[CONF_PORT])
             self._v1_data = {
@@ -114,38 +114,12 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             else:
                 return await self.async_step_v1_trust()
-        elif user_input is not None:
-            user_input.pop("connection_type", None)
-            user_input[CONF_HOST] = str(user_input[CONF_HOST]).strip()
-            try:
-                info = await _validate_input(self.hass, user_input)
-            except MuPiBoxAuthenticationError:
-                errors["base"] = "invalid_auth"
-            except MuPiBoxCannotConnect:
-                errors["base"] = "cannot_connect"
-            except Exception:  # noqa: BLE001 - config flows must convert unexpected errors
-                errors["base"] = "unknown"
-            else:
-                unique_id = str(info.get("box_id", "")).strip() or _endpoint_unique_id(
-                    user_input
-                )
-                await self.async_set_unique_id(unique_id, raise_on_progress=False)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=f"MuPiBox-NG ({user_input[CONF_HOST]})",
-                    data=user_input,
-                )
 
         schema = vol.Schema(
             {
                 vol.Required(CONF_HOST): str,
-                vol.Required(CONF_PORT, default=DEFAULT_PORT): vol.All(
+                vol.Required(CONF_PORT, default=8443): vol.All(
                     vol.Coerce(int), vol.Range(min=1, max=65535)
-                ),
-                vol.Required(CONF_USE_SSL, default=DEFAULT_USE_SSL): bool,
-                vol.Optional(CONF_ADMIN_PASSWORD, default=""): str,
-                vol.Optional("connection_type", default="legacy_ng"): vol.In(
-                    ["legacy_ng", "secure_v1"]
                 ),
             }
         )
@@ -158,59 +132,8 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if (_txt_value(discovery_info.properties, "transport").lower() == "https"
                 and _txt_value(discovery_info.properties, "api_version") == "1"):
             return await self._async_v1_discovery(discovery_info)
-        host = discovery_info.host.rstrip(".")
-        port = int(discovery_info.port or DEFAULT_PORT)
-        properties = discovery_info.properties
-        if discovery_generation(properties) == CLASSIC_GENERATION:
-            return self.async_abort(reason="classic_pairing_not_supported")
-        advertised_id = str(properties.get("id", "")).strip()
-
-        if advertised_id:
-            await self.async_set_unique_id(advertised_id)
-            self._abort_if_unique_id_configured(
-                updates={
-                    CONF_HOST: host,
-                    CONF_PORT: port,
-                    CONF_USE_SSL: False,
-                }
-            )
-
-        data: dict[str, Any] = {
-            CONF_HOST: host,
-            CONF_PORT: port,
-            CONF_USE_SSL: False,
-            CONF_ADMIN_PASSWORD: "",
-        }
-        try:
-            info = await _validate_input(self.hass, data)
-        except MuPiBoxCannotConnect:
-            return self.async_abort(reason="cannot_connect")
-        except Exception:  # noqa: BLE001 - discovery must fail closed
-            return self.async_abort(reason="invalid_discovery")
-
-        box_id = str(info.get("box_id", "")).strip()
-        if not box_id or (advertised_id and advertised_id != box_id):
-            return self.async_abort(reason="invalid_discovery")
-
-        await self.async_set_unique_id(box_id)
-        self._abort_if_unique_id_configured(
-            updates={
-                CONF_HOST: host,
-                CONF_PORT: port,
-                CONF_USE_SSL: False,
-            }
-        )
-
-        self._discovered_data = data
-        self._discovered_box_id = box_id
-        self._discovered_title = _discovery_name(discovery_info)
-        self.context.update(
-            {
-                "title_placeholders": {"name": self._discovered_title},
-                "configuration_url": f"http://{host}:{port}",
-            }
-        )
-        return await self.async_step_zeroconf_confirm()
+        # Never provision insecure/legacy NG through discovery again.
+        return self.async_abort(reason="legacy_pairing_retired")
 
     async def async_step_zeroconf_confirm(
         self, user_input: dict[str, Any] | None = None
