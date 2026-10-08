@@ -102,5 +102,38 @@
         "name": "Speak announcement"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MuPiBox permissions",
+        "description": "Renew permissions without deleting the device or entities. Local box approval is required.",
+        "data": {
+          "allow_notify": "Allow TTS and display messages",
+          "allow_power": "Allow restart and shutdown"
+        }
+      },
+      "approve": {
+        "title": "Approve MuPiBox pairing",
+        "description": "On the box open Admin → Smart Home → secure Home Assistant pairing, then click Continue.",
+        "data": {}
+      },
+      "code": {
+        "title": "Enter confirmation code",
+        "description": "Enter the six-digit code shown on the box. The existing HA device remains in place.",
+        "data": {
+          "code": "Six-digit code"
+        }
+      }
+    },
+    "error": {
+      "pairing_not_enabled": "Pairing approval is missing or expired. Enable it again.",
+      "invalid_auth": "Invalid or expired code.",
+      "cannot_connect": "Cannot connect to MuPiBox."
+    },
+    "abort": {
+      "invalid_discovery": "Device identity mismatch or permissions were not granted.",
+      "legacy_pairing_retired": "Only secure API v1 is supported."
+    }
   }
 }

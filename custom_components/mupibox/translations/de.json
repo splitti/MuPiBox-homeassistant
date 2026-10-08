@@ -102,5 +102,38 @@
         "name": "Sprachnachricht ausgeben"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "MuPiBox-Berechtigungen",
+        "description": "Berechtigungen dieser Box erneuern, ohne Gerät oder Entitäten zu löschen. Die Box muss erneut lokal freigegeben werden.",
+        "data": {
+          "allow_notify": "TTS und Displaynachrichten erlauben",
+          "allow_power": "Neustart und Ausschalten erlauben"
+        }
+      },
+      "approve": {
+        "title": "MuPiBox-Kopplung freigeben",
+        "description": "Öffne auf der Box Admin → Smart Home → Home Assistant sicher koppeln und klicke dann hier auf Weiter.",
+        "data": {}
+      },
+      "code": {
+        "title": "Bestätigungscode eingeben",
+        "description": "Gib den sechsstelligen Code vom MuPiBox-Display ein. Das Gerät bleibt in Home Assistant erhalten.",
+        "data": {
+          "code": "Sechsstelliger Code"
+        }
+      }
+    },
+    "error": {
+      "pairing_not_enabled": "Freigabe fehlt oder ist abgelaufen. Freigabe erneut aktivieren.",
+      "invalid_auth": "Code ungültig oder abgelaufen.",
+      "cannot_connect": "MuPiBox nicht erreichbar."
+    },
+    "abort": {
+      "invalid_discovery": "Geräteidentität stimmt nicht oder Berechtigung wurde nicht erteilt.",
+      "legacy_pairing_retired": "Nur sichere API-v1-Verbindungen unterstützt."
+    }
   }
 }

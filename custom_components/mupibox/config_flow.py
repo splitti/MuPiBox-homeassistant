@@ -79,6 +79,10 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    @staticmethod
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> MuPiBoxOptionsFlow:
+        return MuPiBoxOptionsFlow(config_entry)
+
     def __init__(self) -> None:
         """Initialize the flow."""
         self._v1_data: dict[str, Any] | None = None
@@ -358,4 +362,112 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required("code"): str}),
             errors=errors,
             description_placeholders={"name": self._v1_name},
+        )
+
+
+class MuPiBoxOptionsFlow(config_entries.OptionsFlow):
+    """Renew v1 scopes in-place without replacing the HA device or entity IDs."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self._entry = config_entry
+        self._pending_id = ""
+        self._client_id = str(uuid.uuid4())
+        self._requested_scopes: list[str] = []
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if self._entry.data.get("protocol") != "ha_v1":
+            return self.async_abort(reason="legacy_pairing_retired")
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            self._requested_scopes = ["read", "control"]
+            if user_input.get("allow_notify"):
+                self._requested_scopes.append("notify")
+            if user_input.get("allow_power"):
+                self._requested_scopes.append("power")
+            return await self.async_step_approve()
+        existing = self._entry.data.get("scopes", [])
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required("allow_notify", default="notify" in existing): bool,
+                vol.Required("allow_power", default="power" in existing): bool,
+            }),
+            errors=errors,
+        )
+
+    async def async_step_approve(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if not self._requested_scopes:
+            return self.async_abort(reason="invalid_discovery")
+        if self._pending_id:
+            return await self.async_step_code()
+        data = self._entry.data
+        client = MuPiBoxV1Client(
+            async_get_clientsession(self.hass), data[CONF_HOST], data[CONF_PORT],
+            data["ca_pem"], "",
+        )
+        try:
+            response = await client._v1("POST", "pair/start", {
+                "client_name": "Home Assistant (Berechtigungen)",
+                "client_id": self._client_id,
+                "requested_scopes": self._requested_scopes,
+            })
+        except (MuPiBoxApiError, MuPiBoxAuthenticationError, MuPiBoxCannotConnect):
+            return self.async_show_form(
+                step_id="approve", data_schema=vol.Schema({}),
+                errors={"base": "pairing_not_enabled"},
+            )
+        self._pending_id = str(response.get("pairing_id", ""))
+        if not self._pending_id:
+            return self.async_abort(reason="invalid_discovery")
+        return await self.async_step_code()
+
+    async def async_step_code(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if not self._pending_id:
+            return self.async_abort(reason="invalid_discovery")
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            data = self._entry.data
+            client = MuPiBoxV1Client(
+                async_get_clientsession(self.hass), data[CONF_HOST], data[CONF_PORT],
+                data["ca_pem"], "",
+            )
+            try:
+                response = await client._v1("POST", "pair/confirm", {
+                    "pairing_id": self._pending_id,
+                    "client_id": self._client_id,
+                    "code": str(user_input.get("code", "")).replace(" ", ""),
+                })
+            except (MuPiBoxApiError, MuPiBoxAuthenticationError):
+                errors["base"] = "invalid_auth"
+            except MuPiBoxCannotConnect:
+                errors["base"] = "cannot_connect"
+            else:
+                token = response.get("access_token")
+                device_id = str(response.get("device_id", ""))
+                scopes = response.get("scopes", [])
+                if (not isinstance(token, str) or not token
+                        or device_id != self._entry.unique_id
+                        or not isinstance(scopes, list)
+                        or not set(self._requested_scopes).issubset(set(scopes))):
+                    return self.async_abort(reason="invalid_discovery")
+                previous_token = data.get("access_token")
+                previous_client_id = data.get("client_id")
+                updated = dict(data)
+                updated.update({"access_token": token, "client_id": self._client_id, "scopes": scopes})
+                self.hass.config_entries.async_update_entry(self._entry, data=updated)
+                # Never revoke the old token before the new token is saved.
+                if previous_token and previous_client_id:
+                    try:
+                        old = MuPiBoxV1Client(
+                            async_get_clientsession(self.hass), data[CONF_HOST],
+                            data[CONF_PORT], data["ca_pem"], previous_token,
+                        )
+                        await old._v1("POST", "pair/revoke", {"client_id": previous_client_id})
+                    except (MuPiBoxApiError, MuPiBoxAuthenticationError, MuPiBoxCannotConnect):
+                        pass
+                await self.hass.config_entries.async_reload(self._entry.entry_id)
+                return self.async_create_entry(title="", data={})
+        return self.async_show_form(
+            step_id="code", data_schema=vol.Schema({vol.Required("code"): str}),
+            errors=errors,
         )

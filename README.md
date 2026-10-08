@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.7
+**Home Assistant integration version:** 0.4.8
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -146,3 +146,7 @@ Update availability is checked by a diagnostic binary sensor (up to every 10 min
 ## Secure API v1 endpoints (0.4.7)
 
 Read-scope clients can list `/api/ha/v1/outputs` and retrieve `/api/ha/v1/screenshot`. Control-scope clients can select `/api/ha/v1/outputs/select`. Users may explicitly approve a `notify` scope at pairing to enable `/api/ha/v1/message` and `/api/ha/v1/speak` and the two HA notify entities. Old tokens are never granted newly introduced scopes automatically; re-pair to authorize them. The screenshot and output entities use existing entity IDs, and no unauthenticated v1 fallback is used.
+
+## Extend secure permissions without deleting the HA device (0.4.8)
+
+In Home Assistant → Settings → Devices & services → MuPiBox → Configure, choose TTS/Display notifications and/or power commands, locally approve pairing in MuPiBox Admin and enter the six-digit code. The integration updates the existing config entry in place, preserves its unique ID and all entity registry entries, and loads the newly authorized platforms. Access tokens are replaced only after confirmation; old credentials are revoked after the replacement is persisted.
