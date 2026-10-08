@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.3
+**Home Assistant integration version:** 0.4.4
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -134,3 +134,7 @@ Only HTTPS API v1 pairing is offered for NEW setups. Remove an old NG legacy con
 ## Discovery pairing experience (0.4.2)
 
 Click **Add** on the HTTPS-discovered MuPiBox. Confirm its out-of-band fingerprint once. HACS requests the six-digit code automatically; no separate manual HA pairing-start click. The box must first be approved in its local Admin → Smart Home within the 60-second window. If approval is missing, the dialog offers a retry after approval.
+
+## API v1 restored diagnostics (0.4.4)
+
+Secure API v1 now exposes network connectivity, Wi-Fi connectivity, charging status, CPU usage/temperature, RAM usage and disk usage alongside the original media player, battery, provider and version entities. Notification, audio output, camera and power controls require secure scoped endpoint work and are not yet exposed on v1.

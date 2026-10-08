@@ -145,7 +145,9 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         return {}
 
     async def async_get_system_metrics(self) -> dict[str, Any]:
-        return {}
+        raw = await self._v1("GET", "state")
+        metrics = raw.get("metrics", {})
+        return metrics if isinstance(metrics, dict) else {}
 
     async def async_get_admin_auth(self) -> dict[str, Any]:
         return {"protected": False, "authenticated": False}

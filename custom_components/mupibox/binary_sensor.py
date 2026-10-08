@@ -20,6 +20,15 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up MuPiBox binary sensors."""
+    if entry.data.get("protocol") == "ha_v1":
+        # Only report sensors supported by the authenticated v1 state schema.
+        # Avoid fabricating Spotify, MuPiHAT, TTS, or external-power status.
+        async_add_entities([
+            MuPiBoxOnlineBinarySensor(entry),
+            MuPiBoxWiFiBinarySensor(entry),
+            MuPiBoxChargingBinarySensor(entry),
+        ])
+        return
     async_add_entities(
         [
             MuPiBoxOnlineBinarySensor(entry),

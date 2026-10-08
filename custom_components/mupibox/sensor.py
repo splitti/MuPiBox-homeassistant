@@ -38,6 +38,10 @@ async def async_setup_entry(
         async_add_entities([
             MuPiBoxBatterySensor(entry),
             MuPiBoxWiFiSignalSensor(entry),
+            MuPiBoxCPUUsageSensor(entry),
+            MuPiBoxCPUTemperatureSensor(entry),
+            MuPiBoxRAMUsageSensor(entry),
+            MuPiBoxStorageUsageSensor(entry),
             MuPiBoxActiveProviderSensor(entry),
             MuPiBoxVersionSensor(entry),
         ])
