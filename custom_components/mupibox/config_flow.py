@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
+from .classic_contract import CLASSIC_GENERATION, discovery_generation
 from .api import (
     MuPiBoxApiClient,
     MuPiBoxAuthenticationError,
@@ -119,6 +120,8 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         host = discovery_info.host.rstrip(".")
         port = int(discovery_info.port or DEFAULT_PORT)
         properties = discovery_info.properties
+        if discovery_generation(properties) == CLASSIC_GENERATION:
+            return self.async_abort(reason="classic_pairing_not_supported")
         advertised_id = str(properties.get("id", "")).strip()
 
         if advertised_id:

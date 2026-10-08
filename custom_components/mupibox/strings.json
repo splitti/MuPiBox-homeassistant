@@ -36,7 +36,8 @@
     },
     "abort": {
       "already_configured": "This MuPiBox is already configured.",
-      "invalid_discovery": "The discovered service could not be verified as this MuPiBox."
+      "invalid_discovery": "The discovered service could not be verified as this MuPiBox.",
+      "classic_pairing_not_supported": "Classic was discovered but pairing is not supported yet. Existing NG installations remain unchanged."
     }
   },
   "entity": {
