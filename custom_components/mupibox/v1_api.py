@@ -149,6 +149,14 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         metrics = raw.get("metrics", {})
         return metrics if isinstance(metrics, dict) else {}
 
+    async def async_get_update(self) -> dict[str, Any]:
+        return await self._v1("GET", "update")
+
+    async def async_power(self, action: str) -> dict[str, Any]:
+        if action not in ("reboot", "poweroff"):
+            raise ValueError("Invalid power action")
+        return await self._v1("POST", "power", {"action": action})
+
     async def async_get_admin_auth(self) -> dict[str, Any]:
         return {"protected": False, "authenticated": False}
 

@@ -27,6 +27,7 @@ async def async_setup_entry(
             MuPiBoxOnlineBinarySensor(entry),
             MuPiBoxWiFiBinarySensor(entry),
             MuPiBoxChargingBinarySensor(entry),
+            MuPiBoxV1UpdateBinarySensor(entry),
         ])
         return
     async_add_entities(
@@ -151,3 +152,25 @@ class MuPiBoxTTSBinarySensor(MuPiBoxEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         return bool(self.coordinator.data.info.get("tts", {}).get("enabled"))
+
+
+class MuPiBoxV1UpdateBinarySensor(MuPiBoxEntity, BinarySensorEntity):
+    _attr_name = "Update verfügbar"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "update_available")
+
+    @property
+    def available(self) -> bool:
+        return super().available and "update_available" in self.coordinator.data.update
+
+    @property
+    def is_on(self) -> bool:
+        return self.coordinator.data.update.get("update_available") is True
+
+    @property
+    def extra_state_attributes(self) -> dict[str, object]:
+        data = self.coordinator.data.update
+        release = data.get("release")
+        return {"channel": data.get("channel"), "release": release.get("version") if isinstance(release, dict) else None}

@@ -28,7 +28,8 @@
         "title": "Verify box certificate",
         "description": "Open the MuPiBox local Admin interface → Smart Home → secure Home Assistant pairing. Verify the full SHA-256 SPKI fingerprint displayed there and enter it here. The six-digit code will be requested on the box display only after this verification.",
         "data": {
-          "fingerprint": "Fingerprint from MuPiBox Admin → Smart Home"
+          "fingerprint": "Fingerprint from MuPiBox Admin → Smart Home",
+          "allow_power": "Allow reboot and shutdown"
         }
       },
       "v1_start": {

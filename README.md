@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.4
+**Home Assistant integration version:** 0.4.5
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -138,3 +138,7 @@ Click **Add** on the HTTPS-discovered MuPiBox. Confirm its out-of-band fingerpri
 ## API v1 restored diagnostics (0.4.4)
 
 Secure API v1 now exposes network connectivity, Wi-Fi connectivity, charging status, CPU usage/temperature, RAM usage and disk usage alongside the original media player, battery, provider and version entities. Notification, audio output, camera and power controls require secure scoped endpoint work and are not yet exposed on v1.
+
+## Secure API v1 maintenance (0.4.5)
+
+Update availability is checked by a diagnostic binary sensor (up to every 10 minutes), and reboot/shutdown buttons can be enabled by explicitly approving the `power` scope during **new pairing**. Existing v1 tokens retain their current scopes; to authorize power a fresh pairing is required. These APIs do not restore legacy TTS, camera, audio-output selection or content browsing yet.

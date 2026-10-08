@@ -40,6 +40,7 @@ class MuPiBoxData:
     info: dict[str, Any] = field(default_factory=dict)
     auth: dict[str, Any] = field(default_factory=dict)
     library: list[dict[str, Any]] = field(default_factory=list)
+    update: dict[str, Any] = field(default_factory=dict)
 
 
 class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
@@ -65,6 +66,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
         self._last_auth = 0.0
         self._last_providers = 0.0
         self._last_metrics = 0.0
+        self._last_update_check = 0.0
 
     async def _async_update_data(self) -> MuPiBoxData:
         now = time.monotonic()
@@ -109,6 +111,16 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
                 auth = await self.api.async_get_admin_auth()
                 self._last_auth = now
 
+            update = self._cached.update
+            if (self.entry.data.get("protocol") == "ha_v1"
+                    and (not update or now - self._last_update_check >= 600)):
+                try:
+                    update = await self.api.async_get_update()
+                    self._last_update_check = now
+                except MuPiBoxApiError as err:
+                    _LOGGER.debug("Update check unavailable: %s", err)
+                    self._last_update_check = now
+
             library = self._cached.library
             if not library or now - self._last_library >= LIBRARY_UPDATE_INTERVAL_SECONDS:
                 library = await self.api.async_get_library()
@@ -128,6 +140,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             info=info,
             auth=auth,
             library=library,
+            update=update,
         )
         return self._cached
 

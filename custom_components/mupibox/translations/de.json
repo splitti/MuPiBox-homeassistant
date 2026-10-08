@@ -28,7 +28,8 @@
         "title": "Box-Zertifikat bestätigen",
         "description": "Öffne auf der MuPiBox das lokale Admininterface → Smart Home → Home Assistant sicher koppeln. Vergleiche den dort angezeigten vollständigen SHA-256-SPKI-Fingerprint mit diesem Gerät und gib ihn hier ein. Erst danach wird ein sechsstelliger Code auf dem Box-Display angefordert.",
         "data": {
-          "fingerprint": "Fingerprint aus MuPiBox Admin → Smart Home"
+          "fingerprint": "Fingerprint aus MuPiBox Admin → Smart Home",
+          "allow_power": "Neustart und Ausschalten erlauben"
         }
       },
       "v1_start": {
