@@ -248,34 +248,37 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_v1_start(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """User enables pairing in box Admin before requesting a code."""
+        """Auto-request a code; show retry form only if box approval is missing."""
         if self._v1_data is None or not self._v1_ca:
             return self.async_abort(reason="invalid_discovery")
         errors: dict[str, str] = {}
-        if user_input is not None:
-            client = MuPiBoxV1Client(
-                async_get_clientsession(self.hass),
-                self._v1_data[CONF_HOST],
-                self._v1_data[CONF_PORT],
-                self._v1_ca,
-                "",
+        if self._v1_pairing_id:
+            return await self.async_step_v1_confirm()
+        # Automatically request a challenge after certificate confirmation.
+        # The box still requires an explicit local Admin approval window.
+        client = MuPiBoxV1Client(
+            async_get_clientsession(self.hass),
+            self._v1_data[CONF_HOST],
+            self._v1_data[CONF_PORT],
+            self._v1_ca,
+            "",
+        )
+        try:
+            response = await client._v1(
+                "POST", "pair/start",
+                {
+                    "client_name": "Home Assistant",
+                    "client_id": self._v1_client_id,
+                    "requested_scopes": ["read", "control"],
+                },
             )
-            try:
-                response = await client._v1(
-                    "POST", "pair/start",
-                    {
-                        "client_name": "Home Assistant",
-                        "client_id": self._v1_client_id,
-                        "requested_scopes": ["read", "control"],
-                    },
-                )
-            except (MuPiBoxApiError, MuPiBoxAuthenticationError, MuPiBoxCannotConnect):
-                errors["base"] = "pairing_not_enabled"
-            else:
-                self._v1_pairing_id = str(response.get("pairing_id", ""))
-                if self._v1_pairing_id:
-                    return await self.async_step_v1_confirm()
-                errors["base"] = "unknown"
+        except (MuPiBoxApiError, MuPiBoxAuthenticationError, MuPiBoxCannotConnect):
+            errors["base"] = "pairing_not_enabled"
+        else:
+            self._v1_pairing_id = str(response.get("pairing_id", ""))
+            if self._v1_pairing_id:
+                return await self.async_step_v1_confirm()
+            errors["base"] = "unknown"
         return self.async_show_form(
             step_id="v1_start",
             data_schema=vol.Schema({}),

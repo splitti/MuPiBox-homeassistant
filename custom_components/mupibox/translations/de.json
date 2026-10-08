@@ -32,8 +32,8 @@
         }
       },
       "v1_start": {
-        "title": "Kopplung auf der Box erlauben",
-        "description": "Melde dich am MuPiBox-Admininterface an und klicke unter Smart Home auf 'Home Assistant sicher koppeln'. Kehre hierher zurück und bestätige, bevor die 60 Sekunden ablaufen.",
+        "title": "Freigabe auf der MuPiBox erforderlich",
+        "description": "Öffne Admin → Smart Home, erlaube Home Assistant und klicke hier erneut auf Weiter. Bei aktiver Freigabe wird der sechsstellige Code automatisch angefordert.",
         "data": {}
       },
       "v1_confirm": {

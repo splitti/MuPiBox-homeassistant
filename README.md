@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.1
+**Home Assistant integration version:** 0.4.2
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -130,3 +130,7 @@ security requirements and acceptance tests.
 ## New connections from 0.4.1
 
 Only HTTPS API v1 pairing is offered for NEW setups. Remove an old NG legacy configuration entry in Home Assistant before re-pairing the same physical box; the stable device ID intentionally prevents duplicates. Back up automations/dashboard entity IDs first. The legacy HTTP API remains available locally for MuPiBox components, and already configured HA legacy entries are not automatically deleted.
+
+## Discovery pairing experience (0.4.2)
+
+Click **Add** on the HTTPS-discovered MuPiBox. Confirm its out-of-band fingerprint once. HACS requests the six-digit code automatically; no separate manual HA pairing-start click. The box must first be approved in its local Admin → Smart Home within the 60-second window. If approval is missing, the dialog offers a retry after approval.

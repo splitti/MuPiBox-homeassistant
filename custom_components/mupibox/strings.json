@@ -32,8 +32,8 @@
         }
       },
       "v1_start": {
-        "title": "Enable pairing on the box",
-        "description": "Sign in to MuPiBox Admin and click 'Home Assistant sicher koppeln' under Smart Home. Then return and continue within 60 seconds.",
+        "title": "Approve pairing on MuPiBox",
+        "description": "In MuPiBox Admin → Smart Home, approve Home Assistant pairing, then click Continue to retry. The six-digit code is requested automatically.",
         "data": {}
       },
       "v1_confirm": {
