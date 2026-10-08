@@ -34,6 +34,14 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up MuPiBox sensors."""
+    if entry.data.get("protocol") == "ha_v1":
+        async_add_entities([
+            MuPiBoxBatterySensor(entry),
+            MuPiBoxWiFiSignalSensor(entry),
+            MuPiBoxActiveProviderSensor(entry),
+            MuPiBoxVersionSensor(entry),
+        ])
+        return
     entities: list[SensorEntity] = [
         MuPiBoxBatterySensor(entry),
         MuPiBoxBatteryVoltageSensor(entry),

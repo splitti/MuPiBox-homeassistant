@@ -49,6 +49,26 @@ class MuPiBoxMediaPlayer(MuPiBoxEntity, MediaPlayerEntity):
         | MediaPlayerEntityFeature.BROWSE_MEDIA
     )
 
+    @property
+    def supported_features(self) -> MediaPlayerEntityFeature:
+        if self.entry.data.get("protocol") != "ha_v1":
+            return self._attr_supported_features
+        caps = self.coordinator.data.info.get("capabilities", []) if self.coordinator.data else []
+        mapping = {
+            "play": MediaPlayerEntityFeature.PLAY,
+            "pause": MediaPlayerEntityFeature.PAUSE,
+            "stop": MediaPlayerEntityFeature.STOP,
+            "next": MediaPlayerEntityFeature.NEXT_TRACK,
+            "previous": MediaPlayerEntityFeature.PREVIOUS_TRACK,
+            "seek": MediaPlayerEntityFeature.SEEK,
+            "set_volume": MediaPlayerEntityFeature.VOLUME_SET,
+        }
+        flags = MediaPlayerEntityFeature(0)
+        for capability, feature in mapping.items():
+            if capability in caps:
+                flags |= feature
+        return flags
+
     def __init__(self, entry: MuPiBoxConfigEntry) -> None:
         # Keep the existing local_player unique-id suffix so existing dashboards
         # and automations retain their entity registry entry after the merge.

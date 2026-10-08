@@ -29,7 +29,7 @@ class MuPiBoxEntity(CoordinatorEntity[MuPiBoxCoordinator]):
             identifiers={(DOMAIN, self.entry.unique_id or self.entry.entry_id)},
             name=self.entry.title,
             manufacturer="MuPiBox",
-            model="MuPiBox-NG",
+            model="MuPiBox Classic" if info.get("generation") == "classic" else "MuPiBox-NG",
             sw_version=str(info.get("version", "")) or None,
             configuration_url=self.api.base_url,
         )

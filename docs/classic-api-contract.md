@@ -240,3 +240,32 @@ Events MUST NOT contain credentials. On reconnect, clients re-fetch `/state`; ma
 ## 9. Ownership and release gate
 
 Classic maintainer: implement advertisement, TLS identity display, pairing/token/scopes, API routes, actual status/control. NG maintainer: implement compatible v1 adapter **in addition** to legacy endpoints. HACS maintainer: implement TLS pinning, v1 onboarding/token storage and per-generation adapter. Classic discovery stays blocked in HACS until the pairing/client implementation is complete and tested. **This document is the agreed target protocol, not a report of delivered runtime functionality.**
+
+## 10. NG implementation profile (October 2026)
+
+The NG Go implementation provides a separate HTTPS listener on TCP 8443
+alongside the unchanged legacy HTTP API on TCP 8090. The NG state directory
+contains its private CA, TLS key and certificate. A separate DNS-SD service
+advertises generation=ng, transport=https, api_version=1 and persistent device_id.
+
+In NG Admin -> Smart Home, click Home Assistant sicher koppeln. This invokes
+POST /api/ha/v1/pair/enable, requiring a preexisting authenticated admin
+session. It enables pairing for 60 seconds and displays the SPKI-SHA256
+fingerprint on the physical box. This local trigger is implementation-specific;
+Classic may offer a different physical/admin action.
+
+GET /api/ha/v1/tls/ca returns only the public PEM CA certificate. The client
+must compare the leaf SPKI fingerprint on the physical box first, then download
+the CA over a connection pinned to the verified leaf certificate, and thereafter
+verify TLS identity and hostname against the dedicated per-device CA bundle.
+Never trust the CA solely because it arrived over the local network.
+
+NG initially grants read and control scopes. Other scopes are reserved for
+capability-gated upgrades; their presence in this specification does not imply
+that a device has implemented them. Requests sent over HTTP return 426 with
+https_required for protected API-v1 paths.
+
+HACS 0.4.0 adds optional v1 onboarding for both generations; all existing NG
+entries stay on the old API. Initial v1 entities: media player and available
+battery/Wi-Fi, provider and version sensors. Classic requires firmware that
+implements this protocol, and cannot yet pair until its API is delivered.

@@ -5,7 +5,7 @@ Home Assistant integration for **MuPiBox / MuPiBox-NG**.
 **Author and maintainer:** Olaf Splitt  
 **Website:** https://mupibox.de  
 **MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.3.4
+**Home Assistant integration version:** 0.4.0
 
 The Home Assistant integration is versioned independently from MuPiBox-NG.
 
@@ -103,3 +103,26 @@ The repository includes validation workflows for HACS and Home Assistant Hassfes
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+
+## Secure API v1 (0.4.0, opt-in)
+
+Existing NG installations stay on the legacy HTTP API with their saved admin
+sessions, device and entity IDs and dashboards. No automatic migration or
+re-pairing is performed. API v1 supports both MuPiBox Classic and NG if the
+corresponding box firmware implements the shared contract.
+
+For a new API v1 connection, Home Assistant discovers the HTTPS Zeroconf
+advertisement (or use manual mode secure_v1, port 8443). In NG Admin -> Smart
+Home, click "Home Assistant sicher koppeln" to show the SPKI fingerprint on
+the physical box. Enter and verify the fingerprint in the Home Assistant setup
+dialog. Return to NG Admin and allow pairing again immediately before
+requesting the six-digit code in Home Assistant. Enter the code shown on the
+box (valid for 300 seconds). The box grants only read/control by default.
+
+V1 currently exposes a provider-neutral media player plus battery, Wi-Fi,
+provider and software-version sensors where supported. Existing legacy NG
+entities, including notifications and maintenance controls, remain unchanged.
+
+See docs/classic-api-contract.md for the full protocol, wire schemas,
+security requirements and acceptance tests.

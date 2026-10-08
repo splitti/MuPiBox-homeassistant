@@ -9,13 +9,15 @@
           "host": "Host or IP address",
           "port": "API port",
           "use_ssl": "Use HTTPS",
-          "admin_password": "Admin password (optional)"
+          "admin_password": "Admin password (optional)",
+          "connection_type": "Connection type"
         },
         "data_description": {
           "host": "Hostname or IP address without http:// or https://.",
           "port": "MuPiBox listens on port 8090 by default.",
           "use_ssl": "Enable only when MuPiBox is reached through an HTTPS reverse proxy.",
-          "admin_password": "Leave empty if no admin password is configured or if Home Assistant should only use public player/status functions."
+          "admin_password": "Leave empty if no admin password is configured or if Home Assistant should only use public player/status functions.",
+          "connection_type": "Legacy NG or secure common API v1 for Classic/NG."
         }
       },
       "zeroconf_confirm": {
@@ -27,17 +29,39 @@
         "data_description": {
           "admin_password": "Leave empty for normal player, TTS and status functions. Enter it if protected maintenance actions should also be available."
         }
+      },
+      "v1_trust": {
+        "title": "Verify box certificate",
+        "description": "Compare the SHA-256 SPKI fingerprint with the trusted local display of {name}. Enter the exact fingerprint shown on the box; do not blindly trust the network.",
+        "data": {
+          "fingerprint": "Fingerprint shown on box display"
+        }
+      },
+      "v1_start": {
+        "title": "Enable pairing on the box",
+        "description": "Sign in to MuPiBox Admin and click 'Home Assistant sicher koppeln' under Smart Home. Then return and continue within 60 seconds.",
+        "data": {}
+      },
+      "v1_confirm": {
+        "title": "Enter display pairing code",
+        "description": "Enter the six-digit code shown on {name}; it expires after five minutes.",
+        "data": {
+          "code": "Six-digit pairing code"
+        }
       }
     },
     "error": {
       "cannot_connect": "Cannot connect to MuPiBox.",
       "invalid_auth": "The MuPiBox admin password is invalid.",
-      "unknown": "Unexpected error while connecting to MuPiBox."
+      "unknown": "Unexpected error while connecting to MuPiBox.",
+      "invalid_fingerprint": "The fingerprint does not match the box.",
+      "pairing_not_enabled": "Pairing was not enabled or failed. Enable it again on the box."
     },
     "abort": {
       "already_configured": "This MuPiBox is already configured.",
       "invalid_discovery": "The discovered service could not be verified as this MuPiBox.",
-      "classic_pairing_not_supported": "Classic was discovered but pairing is not supported yet. Existing NG installations remain unchanged."
+      "classic_pairing_not_supported": "Classic was discovered but pairing is not supported yet. Existing NG installations remain unchanged.",
+      "cannot_connect": "Cannot connect to the box."
     }
   },
   "entity": {

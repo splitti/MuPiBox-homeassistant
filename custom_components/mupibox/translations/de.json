@@ -9,13 +9,15 @@
           "host": "Host oder IP-Adresse",
           "port": "API-Port",
           "use_ssl": "HTTPS verwenden",
-          "admin_password": "Admin-Passwort (optional)"
+          "admin_password": "Admin-Passwort (optional)",
+          "connection_type": "Verbindungstyp"
         },
         "data_description": {
           "host": "Hostname oder IP-Adresse ohne http:// oder https://.",
           "port": "MuPiBox verwendet standardmäßig Port 8090.",
           "use_ssl": "Nur aktivieren, wenn MuPiBox über einen HTTPS-Reverse-Proxy erreichbar ist.",
-          "admin_password": "Leer lassen, wenn kein Admin-Passwort gesetzt ist oder Home Assistant nur die öffentlichen Player-/Statusfunktionen verwenden soll."
+          "admin_password": "Leer lassen, wenn kein Admin-Passwort gesetzt ist oder Home Assistant nur die öffentlichen Player-/Statusfunktionen verwenden soll.",
+          "connection_type": "Legacy-NG oder sichere gemeinsame API v1 für Classic/NG."
         }
       },
       "zeroconf_confirm": {
@@ -27,17 +29,39 @@
         "data_description": {
           "admin_password": "Für normale Player-, TTS- und Statusfunktionen leer lassen. Eintragen, wenn auch geschützte Wartungsaktionen verfügbar sein sollen."
         }
+      },
+      "v1_trust": {
+        "title": "Box-Zertifikat bestätigen",
+        "description": "Vergleiche den SHA-256-SPKI-Fingerprint mit der Anzeige auf {name}. Gib genau den am Box-Display angezeigten Wert ein. Niemals nur den Netzwerk-Fingerprint ungeprüft übernehmen.",
+        "data": {
+          "fingerprint": "Fingerprint vom Box-Display"
+        }
+      },
+      "v1_start": {
+        "title": "Kopplung auf der Box erlauben",
+        "description": "Melde dich am MuPiBox-Admininterface an und klicke unter Smart Home auf 'Home Assistant sicher koppeln'. Kehre hierher zurück und bestätige, bevor die 60 Sekunden ablaufen.",
+        "data": {}
+      },
+      "v1_confirm": {
+        "title": "Display-Code eingeben",
+        "description": "Gib den sechsstelligen Code von {name} ein. Der Code ist fünf Minuten gültig.",
+        "data": {
+          "code": "Sechsstelliger Kopplungscode"
+        }
       }
     },
     "error": {
       "cannot_connect": "MuPiBox ist nicht erreichbar.",
       "invalid_auth": "Das MuPiBox-Admin-Passwort ist ungültig.",
-      "unknown": "Beim Verbinden mit MuPiBox ist ein unerwarteter Fehler aufgetreten."
+      "unknown": "Beim Verbinden mit MuPiBox ist ein unerwarteter Fehler aufgetreten.",
+      "invalid_fingerprint": "Der Fingerprint stimmt nicht mit der Box überein.",
+      "pairing_not_enabled": "Kopplung auf der Box nicht freigegeben oder fehlgeschlagen. Auf der Box erneut aktivieren."
     },
     "abort": {
       "already_configured": "Diese MuPiBox ist bereits eingerichtet.",
       "invalid_discovery": "Der gefundene Dienst konnte nicht als diese MuPiBox verifiziert werden.",
-      "classic_pairing_not_supported": "Classic erkannt. Die Kopplung wird noch nicht unterstützt. Bestehende NG-Installationen bleiben unverändert."
+      "classic_pairing_not_supported": "Classic erkannt. Die Kopplung wird noch nicht unterstützt. Bestehende NG-Installationen bleiben unverändert.",
+      "cannot_connect": "Die Box ist nicht erreichbar."
     }
   },
   "entity": {
