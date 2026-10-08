@@ -39,4 +39,6 @@ class MuPiBoxDisplayCamera(MuPiBoxEntity, Camera):
     ) -> bytes | None:
         """Return a fresh screenshot from the MuPiBox display."""
         del width, height
+        if self.entry.data.get("protocol") == "ha_v1":
+            return await self.api.async_screenshot()
         return await self.api.async_admin_get_bytes("/api/admin/screenshot")

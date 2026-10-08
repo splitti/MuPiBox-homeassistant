@@ -142,7 +142,36 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         return {}
 
     async def async_get_output_targets(self) -> dict[str, Any]:
-        return {}
+        return await self._v1("GET", "outputs")
+
+    async def async_select_output_target(self, target_id: str) -> dict[str, Any]:
+        return await self._v1("POST", "outputs/select", {"target_id": target_id})
+
+    async def async_show_message(self, message: str, *, title: str | None = None, duration_ms: int = 8000) -> dict[str, Any]:
+        return await self._v1("POST", "message", {"message": message, "title": title or "", "duration_ms": duration_ms})
+
+    async def async_speak(self, text: str, source_ref: str = "home-assistant") -> dict[str, Any]:
+        del source_ref
+        return await self._v1("POST", "speak", {"text": text})
+
+    async def async_screenshot(self) -> bytes:
+        import asyncio
+        from aiohttp import ClientError
+        try:
+            async with asyncio.timeout(12):
+                async with self._session.get(
+                    f"{self.base_url}/api/ha/v1/screenshot",
+                    ssl=self._ssl_context,
+                    headers={"Authorization": f"Bearer {self._token}"},
+                ) as response:
+                    if response.status != 200 or response.content_type != "image/png":
+                        raise MuPiBoxApiError("Screenshot unavailable", status=response.status)
+                    image = await response.read()
+                    if len(image) > 8 * 1024 * 1024:
+                        raise MuPiBoxApiError("Screenshot too large")
+                    return image
+        except (TimeoutError, ClientError, OSError) as error:
+            raise MuPiBoxCannotConnect(f"Screenshot failed: {error}") from error
 
     async def async_get_system_metrics(self) -> dict[str, Any]:
         raw = await self._v1("GET", "state")

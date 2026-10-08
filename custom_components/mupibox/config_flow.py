@@ -91,6 +91,7 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._v1_client_id = str(uuid.uuid4())
         self._v1_pairing_id = ""
         self._v1_allow_power = False
+        self._v1_allow_notify = False
         self._discovered_data: dict[str, Any] | None = None
         self._discovered_title = "MuPiBox-NG"
         self._discovered_box_id = ""
@@ -226,6 +227,7 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             self._v1_allow_power = bool(user_input.get("allow_power", False))
+            self._v1_allow_notify = bool(user_input.get("allow_notify", False))
             if normalized_fingerprint(str(user_input["fingerprint"])) != self._v1_fingerprint:
                 errors["base"] = "invalid_fingerprint"
             else:
@@ -242,7 +244,7 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return await self.async_step_v1_start()
         return self.async_show_form(
             step_id="v1_trust",
-            data_schema=vol.Schema({vol.Required("fingerprint"): str, vol.Optional("allow_power", default=False): bool}),
+            data_schema=vol.Schema({vol.Required("fingerprint"): str, vol.Optional("allow_power", default=False): bool, vol.Optional("allow_notify", default=False): bool}),
             errors=errors,
             description_placeholders={"name": self._v1_name},
         )
@@ -271,7 +273,7 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     "client_name": "Home Assistant",
                     "client_id": self._v1_client_id,
-                    "requested_scopes": ["read", "control"] + (["power"] if self._v1_allow_power else []),
+                    "requested_scopes": ["read", "control"] + (["power"] if self._v1_allow_power else []) + (["notify"] if self._v1_allow_notify else []),
                 },
             )
         except (MuPiBoxApiError, MuPiBoxAuthenticationError, MuPiBoxCannotConnect):
