@@ -60,6 +60,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             update_interval=UPDATE_INTERVAL,
         )
         self.api = api
+        self._is_v1 = entry.data.get("protocol") == "ha_v1"
         self._cached = MuPiBoxData()
         self._last_library = 0.0
         self._last_info = 0.0
@@ -112,7 +113,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
                 self._last_auth = now
 
             update = self._cached.update
-            if (self.entry.data.get("protocol") == "ha_v1"
+            if (self._is_v1
                     and (not update or now - self._last_update_check >= 600)):
                 try:
                     update = await self.api.async_get_update()
