@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+
+- Brand images in `brand/` at the sizes Home Assistant expects (icon and logo 256 × 256 plus `@2x` 512 × 512, trimmed, transparent), rendered from the high-resolution MuPiBox logo. Since Home Assistant 2026.3 these local images replace the brands CDN, which no longer accepts custom integrations.
+
 ## 0.5.1
 
 - Rejected commands (e.g. HTTP 409 "play" with nothing loaded) now show the box's message as a Home Assistant error instead of "Unknown error".
