@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.9
+
+- Remove the unreachable legacy discovery dialog that still offered an optional MuPiBox admin password. Discovered boxes always use the secure HTTPS API v1 pairing (fingerprint and six-digit display code); permissions for announcements and power commands are granted during pairing.
+
 ## 0.3.4
 
 - Add clear translated names and icons for the two Home Assistant notification targets: display text and spoken announcement.

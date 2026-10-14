@@ -14,16 +14,6 @@
           "port": "Standard: 8443."
         }
       },
-      "zeroconf_confirm": {
-        "title": "MuPiBox gefunden",
-        "description": "Home Assistant hat {name} im lokalen Netzwerk gefunden. Bestätige, um die Box hinzuzufügen. Das Admin-Passwort ist optional und wird nur für geschützte Wartungsaktionen benötigt.",
-        "data": {
-          "admin_password": "Admin-Passwort (optional)"
-        },
-        "data_description": {
-          "admin_password": "Für normale Player-, TTS- und Statusfunktionen leer lassen. Eintragen, wenn auch geschützte Wartungsaktionen verfügbar sein sollen."
-        }
-      },
       "v1_trust": {
         "title": "Box-Zertifikat bestätigen",
         "description": "Öffne auf der MuPiBox das lokale Admininterface → Smart Home → Home Assistant sicher koppeln. Vergleiche den dort angezeigten vollständigen SHA-256-SPKI-Fingerprint mit diesem Gerät und gib ihn hier ein. Erst danach wird ein sechsstelliger Code auf dem Box-Display angefordert.",

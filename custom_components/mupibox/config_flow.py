@@ -10,7 +10,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_HOST, CONF_PORT
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
@@ -18,13 +17,11 @@ from .classic_contract import CLASSIC_GENERATION, discovery_generation
 from .v1_api import MuPiBoxV1Client
 from .v1_trust import probe_device_key, fetch_verified_ca, normalized_fingerprint
 from .api import (
-    MuPiBoxApiClient,
     MuPiBoxApiError,
     MuPiBoxAuthenticationError,
     MuPiBoxCannotConnect,
 )
 from .const import (
-    CONF_ADMIN_PASSWORD,
     CONF_USE_SSL,
     DEFAULT_PORT,
     DEFAULT_USE_SSL,
@@ -54,26 +51,6 @@ def _discovery_name(discovery_info: ZeroconfServiceInfo) -> str:
     return name.rstrip(".") or "MuPiBox-NG"
 
 
-async def _validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    api = MuPiBoxApiClient(
-        async_get_clientsession(hass),
-        data[CONF_HOST],
-        data[CONF_PORT],
-        data.get(CONF_USE_SSL, False),
-        data.get(CONF_ADMIN_PASSWORD, ""),
-    )
-    health = await api.async_get_health()
-    if health.get("status") != "ok":
-        raise MuPiBoxCannotConnect("MuPiBox health endpoint did not return status=ok")
-
-    info = await api.async_get_info()
-    auth = await api.async_get_admin_auth()
-    if auth.get("protected") and data.get(CONF_ADMIN_PASSWORD):
-        await api.async_login()
-
-    return info
-
-
 class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a MuPiBox-NG config flow."""
 
@@ -96,9 +73,6 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._v1_pairing_id = ""
         self._v1_allow_power = False
         self._v1_allow_notify = False
-        self._discovered_data: dict[str, Any] | None = None
-        self._discovered_title = "MuPiBox-NG"
-        self._discovered_box_id = ""
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -140,45 +114,6 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self._async_v1_discovery(discovery_info)
         # Never provision insecure/legacy NG through discovery again.
         return self.async_abort(reason="legacy_pairing_retired")
-
-    async def async_step_zeroconf_confirm(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Confirm a discovered MuPiBox and optionally add Admin credentials."""
-        if self._discovered_data is None:
-            return self.async_abort(reason="invalid_discovery")
-
-        errors: dict[str, str] = {}
-        if user_input is not None:
-            data = dict(self._discovered_data)
-            data[CONF_ADMIN_PASSWORD] = str(
-                user_input.get(CONF_ADMIN_PASSWORD, "")
-            ).strip()
-            try:
-                info = await _validate_input(self.hass, data)
-            except MuPiBoxAuthenticationError:
-                errors["base"] = "invalid_auth"
-            except MuPiBoxCannotConnect:
-                errors["base"] = "cannot_connect"
-            except Exception:  # noqa: BLE001
-                errors["base"] = "unknown"
-            else:
-                box_id = str(info.get("box_id", "")).strip()
-                if box_id != self._discovered_box_id:
-                    return self.async_abort(reason="invalid_discovery")
-                return self.async_create_entry(
-                    title=self._discovered_title,
-                    data=data,
-                )
-
-        return self.async_show_form(
-            step_id="zeroconf_confirm",
-            data_schema=vol.Schema(
-                {vol.Optional(CONF_ADMIN_PASSWORD, default=""): str}
-            ),
-            errors=errors,
-            description_placeholders={"name": self._discovered_title},
-        )
 
     async def _async_v1_discovery(
         self, discovery_info: ZeroconfServiceInfo

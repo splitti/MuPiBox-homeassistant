@@ -14,16 +14,6 @@
           "port": "Default: 8443."
         }
       },
-      "zeroconf_confirm": {
-        "title": "Discovered MuPiBox",
-        "description": "Home Assistant discovered {name} on your local network. Confirm to add it. The admin password is optional and only enables protected maintenance actions.",
-        "data": {
-          "admin_password": "Admin password (optional)"
-        },
-        "data_description": {
-          "admin_password": "Leave empty for normal player, TTS and status functions. Enter it if protected maintenance actions should also be available."
-        }
-      },
       "v1_trust": {
         "title": "Verify box certificate",
         "description": "Open the MuPiBox local Admin interface → Smart Home → secure Home Assistant pairing. Verify the full SHA-256 SPKI fingerprint displayed there and enter it here. The six-digit code will be requested on the box display only after this verification.",
