@@ -37,6 +37,10 @@ async def async_setup_entry(
     if entry.data.get("protocol") == "ha_v1":
         async_add_entities([
             MuPiBoxBatterySensor(entry),
+            MuPiBoxBatteryVoltageSensor(entry),
+            MuPiBoxBatteryCurrentSensor(entry),
+            MuPiBoxMuPiHATTemperatureSensor(entry),
+            MuPiBoxOperatingStateSensor(entry),
             MuPiBoxWiFiSignalSensor(entry),
             MuPiBoxCPUUsageSensor(entry),
             MuPiBoxCPUTemperatureSensor(entry),
@@ -361,3 +365,21 @@ class MuPiBoxPlaybackEngineSensor(MuPiBoxEntity, SensorEntity):
     def native_value(self) -> str | None:
         value = self.coordinator.data.status.get("backend") or self.coordinator.data.info.get("backend")
         return str(value) if value else None
+
+
+class MuPiBoxOperatingStateSensor(MuPiBoxEntity, SensorEntity):
+    """What the box is doing: playing, in use, idle, display off or standby."""
+
+    _attr_translation_key = "operating_state"
+    _attr_has_entity_name = True
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["playing", "in_use", "idle", "display_off", "standby"]
+    _attr_icon = "mdi:power-settings"
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "operating_state")
+
+    @property
+    def native_value(self) -> str | None:
+        value = self.coordinator.data.system.get("power_state")
+        return value if value in self._attr_options else None

@@ -77,6 +77,16 @@
     "sensor": {
       "playback_engine": {
         "name": "Wiedergabe-Engine"
+      },
+      "operating_state": {
+        "name": "Betriebszustand",
+        "state": {
+          "playing": "Wiedergabe",
+          "in_use": "In Benutzung",
+          "idle": "Idle",
+          "display_off": "Display aus",
+          "standby": "Standby"
+        }
       }
     },
     "select": {

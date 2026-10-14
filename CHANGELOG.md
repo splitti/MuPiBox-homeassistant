@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- Secure API v1: MuPiHAT values (battery voltage and current, MuPiHAT temperature, external power) are read from the optional fields of `/state`, so these entities work with pairing again. They stay unavailable on boxes without a MuPiHAT or with older firmware.
+- New sensor **Operating state** (`playing`, `in_use`, `idle`, `display_off`, `standby`) from the box's `device.power_state` (MuPiBox NG 0.1.0-test.19 or newer). Shown as a coloured timeline in the history graph.
+- One `/state` request per refresh instead of up to four.
+- Dashboard docs: battery history template with operating state and hover values.
+
 ## 0.4.9
 
 - Remove the unreachable legacy discovery dialog that still offered an optional MuPiBox admin password. Discovered boxes always use the secure HTTPS API v1 pairing (fingerprint and six-digit display code); permissions for announcements and power commands are granted during pairing.

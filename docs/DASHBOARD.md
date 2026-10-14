@@ -395,3 +395,33 @@ The MuPiBox displays this as a transient overlay without interrupting playback. 
 - Provider status sensors deliberately expose only safe status/configuration information and never credentials.
 - `Playback engine` is a low-level diagnostic and is disabled by default; it is intentionally not part of these templates.
 - The dashboard does not require Card Mod, Mushroom, Button Card, Mini Graph Card or ApexCharts.
+
+## Battery history with operating state (0.5.0+)
+
+Requires MuPiBox NG 0.1.0-test.19 or newer. The built-in `history-graph` card draws the **Operating state** sensor as a coloured timeline above the numeric curves and shows the exact values on hover or tap.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: history-graph
+    title: Battery and operating state
+    hours_to_show: 24
+    entities:
+      - entity: MUPIBOX_OPERATING_STATE
+      - entity: MUPIBOX_BATTERY
+      - entity: MUPIBOX_CPU_USAGE
+  - type: history-graph
+    title: Current and voltage
+    hours_to_show: 24
+    entities:
+      - entity: MUPIBOX_BATTERY_CURRENT
+      - entity: MUPIBOX_BATTERY_VOLTAGE
+  - type: statistics-graph
+    title: Battery – 7 days
+    days_to_show: 7
+    chart_type: line
+    stat_types: [mean, min, max]
+    entities:
+      - MUPIBOX_BATTERY
+```
+

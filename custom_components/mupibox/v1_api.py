@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import ssl
+import time
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -31,6 +32,24 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         super().__init__(session, host, port, True)
         self._token = token
         self._ssl_context = ssl.create_default_context(cadata=ca_pem)
+        self._state_cache: tuple[float, dict[str, Any]] | None = None
+        self._state_lock = asyncio.Lock()
+
+    async def _state(self) -> dict[str, Any]:
+        """Return /state, shared by status, system, MuPiHAT and metrics.
+
+        One coordinator refresh asks for all four within a moment; a short
+        cache turns that into a single request to the box.
+        """
+        # The coordinator gathers status, system and MuPiHAT concurrently;
+        # the lock lets the first caller fetch while the others wait for it.
+        async with self._state_lock:
+            now = time.monotonic()
+            if self._state_cache and now - self._state_cache[0] < 2.0:
+                return self._state_cache[1]
+            raw = await self._v1("GET", "state")
+            self._state_cache = (time.monotonic(), raw)
+            return raw
 
     async def _v1(
         self, method: str, path: str, data: dict[str, Any] | None = None
@@ -78,7 +97,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         }
 
     async def async_get_status(self) -> dict[str, Any]:
-        raw = await self._v1("GET", "state")
+        raw = await self._state()
         playback = raw.get("playback", {})
         if not isinstance(playback, dict):
             raise MuPiBoxApiError("Invalid playback data")
@@ -113,7 +132,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
         }
 
     async def async_get_system(self) -> dict[str, Any]:
-        raw = await self._v1("GET", "state")
+        raw = await self._state()
         device = raw.get("device", {})
         if not isinstance(device, dict):
             return {}
@@ -130,13 +149,33 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
                 "percent": battery,
                 "charging": device.get("charging"),
             },
+            "power_state": device.get("power_state"),
         }
 
     async def async_get_spotify_status(self) -> dict[str, Any]:
         return {}
 
     async def async_get_mupihat_status(self) -> dict[str, Any]:
-        return {}
+        """Map the optional MuPiHAT fields of /state to the legacy schema.
+
+        Boxes without a MuPiHAT (or older firmware) send none of them; then
+        the MuPiHAT entities stay unavailable instead of showing zeros.
+        """
+        raw = await self._state()
+        device = raw.get("device", {})
+        if not isinstance(device, dict) or "external_power" not in device:
+            return {}
+        battery = device.get("battery_percent")
+        return {
+            "hardware_available": True,
+            "battery_present": isinstance(battery, (int, float)),
+            "battery_percent": battery,
+            "charging": device.get("charging"),
+            "external_power": device.get("external_power"),
+            "battery_voltage_mv": device.get("battery_voltage_mv"),
+            "battery_current_ma": device.get("battery_current_ma"),
+            "temperature_c": device.get("mupihat_temperature_c"),
+        }
 
     async def async_get_provider_status(self) -> dict[str, Any]:
         return {}
@@ -174,7 +213,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
             raise MuPiBoxCannotConnect(f"Screenshot failed: {error}") from error
 
     async def async_get_system_metrics(self) -> dict[str, Any]:
-        raw = await self._v1("GET", "state")
+        raw = await self._state()
         metrics = raw.get("metrics", {})
         return metrics if isinstance(metrics, dict) else {}
 

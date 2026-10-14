@@ -22,11 +22,13 @@ async def async_setup_entry(
     """Set up MuPiBox binary sensors."""
     if entry.data.get("protocol") == "ha_v1":
         # Only report sensors supported by the authenticated v1 state schema.
-        # Avoid fabricating Spotify, MuPiHAT, TTS, or external-power status.
+        # External power comes from the optional MuPiHAT fields and stays
+        # unavailable without them; Spotify and TTS status are not fabricated.
         async_add_entities([
             MuPiBoxOnlineBinarySensor(entry),
             MuPiBoxWiFiBinarySensor(entry),
             MuPiBoxChargingBinarySensor(entry),
+            MuPiBoxExternalPowerBinarySensor(entry),
             MuPiBoxV1UpdateBinarySensor(entry),
         ])
         return
