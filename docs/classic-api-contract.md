@@ -186,6 +186,8 @@ Default request is `["read","control"]`. `notify`, `power`, and `admin` need exp
 }
 ```
 
+`GET /info` MAY include `web_url` (absolute http/https URL of the box's own web UI for Home Assistant's "Visit" link) and SHOULD return the box's own name in `name` rather than a product name.
+
 Optional `device` fields (MuPiBox NG 0.1.0-test.19+; a generation MAY omit them, clients MUST treat them as absent, never as zero): `external_power` (bool, present exactly when a MuPiHAT is detected), `battery_voltage_mv` (int), `battery_current_ma` (int, negative while discharging; only when the charger measures it), `mupihat_temperature_c` (number), `power_state` (`playing`, `in_use`, `idle`, `display_off`, `standby`; omitted when unknown).
 
 `playback.state` is one of `playing`, `paused`, `idle`, `buffering`, `unavailable`. Duration/position are in **seconds**, volume is **integer 0–100**; unavailable measurements are JSON `null`, never fabricated. Status MUST describe real playback regardless of initiating source (touch, RFID, hardware buttons, Spotify Connect, HA). `cover_url` MUST be a same-device relative URL or validated absolute HTTPS URL; it MUST NOT embed secrets. If implemented, `/media/cover/current` requires `read`; currently do not assume every generation implements it. Capabilities accurately describe functioning methods (e.g. `set_volume`, not `volume`). Unsupported capabilities MUST NOT be exposed as functional entities or controls.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1
+
+- Rejected commands (e.g. HTTP 409 "play" with nothing loaded) now show the box's message as a Home Assistant error instead of "Unknown error".
+- "Visit" opens the box's web UI: `web_url` from `/info` when the box sends it, otherwise the NG admin on port 8090 – never the HTTPS API port.
+- The device uses the box's own name from `/info`; the automatic setup title "MuPiBox (<ip>)" is replaced on start (a title you changed stays).
+- The pinned TLS context is built in an executor, which removes the "blocking call to load_verify_locations" warning.
+
 ## 0.5.0
 
 - Secure API v1: MuPiHAT values (battery voltage and current, MuPiHAT temperature, external power) are read from the optional fields of `/state`, so these entities work with pairing again. They stay unavailable on boxes without a MuPiHAT or with older firmware.

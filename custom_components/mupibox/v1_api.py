@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import ssl
 import time
 from typing import Any
@@ -31,7 +32,8 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
     ) -> None:
         super().__init__(session, host, port, True)
         self._token = token
-        self._ssl_context = ssl.create_default_context(cadata=ca_pem)
+        self._ca_pem = ca_pem
+        self._ssl_context: ssl.SSLContext | None = None
         self._state_cache: tuple[float, dict[str, Any]] | None = None
         self._state_lock = asyncio.Lock()
 
@@ -51,6 +53,19 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
             self._state_cache = (time.monotonic(), raw)
             return raw
 
+    async def _context(self) -> ssl.SSLContext:
+        """Build the pinned TLS context once, off the event loop.
+
+        Loading the CA (load_verify_locations) blocks; Home Assistant warns
+        about blocking calls inside the event loop.
+        """
+        if self._ssl_context is None:
+            loop = asyncio.get_running_loop()
+            self._ssl_context = await loop.run_in_executor(
+                None, functools.partial(ssl.create_default_context, cadata=self._ca_pem)
+            )
+        return self._ssl_context
+
     async def _v1(
         self, method: str, path: str, data: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -61,7 +76,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
                 async with self._session.request(
                     method,
                     url,
-                    ssl=self._ssl_context,
+                    ssl=await self._context(),
                     json=data,
                     headers=headers,
                 ) as response:
@@ -75,8 +90,11 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
                             str(payload.get("error", "unauthorized")), status=response.status
                         )
                     if response.status >= 400:
+                        # Prefer the human-readable message (e.g. 409 "nothing
+                        # loaded to play") over the machine error code.
                         raise MuPiBoxApiError(
-                            str(payload.get("error", "api_error")), status=response.status
+                            str(payload.get("message") or payload.get("error", "api_error")),
+                            status=response.status,
                         )
                     return payload
         except (TimeoutError, ClientError, OSError, ssl.SSLError) as error:
@@ -94,6 +112,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
             "generation": raw.get("generation"),
             "capabilities": raw.get("capabilities", []),
             "name": raw.get("name"),
+            "web_url": raw.get("web_url"),
         }
 
     async def async_get_status(self) -> dict[str, Any]:
@@ -200,7 +219,7 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
             async with asyncio.timeout(12):
                 async with self._session.get(
                     f"{self.base_url}/api/ha/v1/screenshot",
-                    ssl=self._ssl_context,
+                    ssl=await self._context(),
                     headers={"Authorization": f"Bearer {self._token}"},
                 ) as response:
                     if response.status != 200 or response.content_type != "image/png":

@@ -153,6 +153,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> b
     await coordinator.async_config_entry_first_refresh()
 
     _migrate_config_entry_identity(hass, entry, coordinator.data.info)
+    _adopt_box_name(hass, entry, coordinator.data.info)
     if entry.data.get("protocol") != "ha_v1":
         _remove_obsolete_entities(hass, entry)
 
@@ -160,6 +161,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> b
     platforms = ["media_player", "sensor", "binary_sensor", "button", "select", "camera"] + (["notify"] if "notify" in entry.data.get("scopes", []) else []) if entry.data.get("protocol") == "ha_v1" else PLATFORMS
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
     return True
+
+
+def _adopt_box_name(hass: HomeAssistant, entry: MuPiBoxConfigEntry, info: dict) -> None:
+    """Replace the setup title "MuPiBox (<ip>)" with the box's own name.
+
+    Only the automatic title is touched; a title the user changed stays.
+    """
+    name = str(info.get("name") or "").strip()
+    if not name or name.lower() in {"mupibox", "mupibox ng", "mupibox-ng", "mupibox classic"}:
+        return
+    if entry.title.startswith("MuPiBox (") and entry.title.endswith(")") and entry.title != name:
+        hass.config_entries.async_update_entry(entry, title=name)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> bool:

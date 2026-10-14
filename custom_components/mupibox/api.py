@@ -45,6 +45,11 @@ class MuPiBoxApiClient:
         self._admin_cookie: str | None = None
 
     @property
+    def host(self) -> str:
+        """Return the configured host name or address."""
+        return self._host
+
+    @property
     def base_url(self) -> str:
         """Return the configured base URL."""
         scheme = "https" if self._use_ssl else "http"

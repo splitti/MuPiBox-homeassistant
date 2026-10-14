@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import MuPiBoxConfigEntry
-from .entity import MuPiBoxEntity
+from .entity import MuPiBoxEntity, box_call
 
 
 async def async_setup_entry(
@@ -222,11 +222,11 @@ class MuPiBoxMediaPlayer(MuPiBoxEntity, MediaPlayerEntity):
         await self.coordinator.async_request_refresh()
 
     async def _local_command(self, action: str, **kwargs: Any) -> None:
-        await self.api.async_command(action, **kwargs)
+        await box_call(self.api.async_command(action, **kwargs))
         await self._refresh()
 
     async def _spotify_command(self, action: str, value: int | None = None) -> None:
-        await self.api.async_spotify_command(action, value)
+        await box_call(self.api.async_spotify_command(action, value))
         await self._refresh()
 
     async def async_media_play(self) -> None:
@@ -289,7 +289,7 @@ class MuPiBoxMediaPlayer(MuPiBoxEntity, MediaPlayerEntity):
     ) -> None:
         del media_type, kwargs
         if media_id.startswith("spotify:"):
-            await self.api.async_spotify_command("play", uri=media_id)
+            await box_call(self.api.async_spotify_command("play", uri=media_id))
             await self._refresh()
             return
         if media_id.startswith("folder:"):

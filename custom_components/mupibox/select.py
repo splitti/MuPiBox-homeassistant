@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import MuPiBoxConfigEntry
-from .entity import MuPiBoxEntity
+from .entity import MuPiBoxEntity, box_call
 
 
 async def async_setup_entry(
@@ -88,5 +88,5 @@ class MuPiBoxAudioOutputSelect(MuPiBoxEntity, SelectEntity):
         target_id = self._option_map().get(option)
         if target_id is None:
             raise ValueError(f"Unknown MuPiBox audio output: {option}")
-        await self.api.async_select_output_target(target_id)
+        await box_call(self.api.async_select_output_target(target_id))
         await self.coordinator.async_request_refresh()

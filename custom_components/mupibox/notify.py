@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import MuPiBoxConfigEntry
-from .entity import MuPiBoxEntity
+from .entity import MuPiBoxEntity, box_call
 
 
 async def async_setup_entry(
@@ -35,7 +35,7 @@ class MuPiBoxDisplayMessageEntity(MuPiBoxEntity, NotifyEntity):
         super().__init__(entry, "display_message")
 
     async def async_send_message(self, message: str, title: str | None = None) -> None:
-        await self.api.async_show_message(message, title=title)
+        await box_call(self.api.async_show_message(message, title=title))
 
 
 class MuPiBoxAnnouncementEntity(MuPiBoxEntity, NotifyEntity):
@@ -51,5 +51,5 @@ class MuPiBoxAnnouncementEntity(MuPiBoxEntity, NotifyEntity):
 
     async def async_send_message(self, message: str, title: str | None = None) -> None:
         del title
-        await self.api.async_speak(message, source_ref=f"home-assistant:{self.entry.entry_id}")
+        await box_call(self.api.async_speak(message, source_ref=f"home-assistant:{self.entry.entry_id}"))
         await self.coordinator.async_request_refresh()

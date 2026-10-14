@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import MuPiBoxConfigEntry
-from .entity import MuPiBoxEntity
+from .entity import MuPiBoxEntity, box_call
 
 
 async def async_setup_entry(
@@ -49,7 +49,7 @@ class MuPiBoxRescanLibraryButton(MuPiBoxAdminButton):
         super().__init__(entry, "rescan_library")
 
     async def async_press(self) -> None:
-        await self.api.async_admin_post("/api/admin/library/rescan")
+        await box_call(self.api.async_admin_post("/api/admin/library/rescan"))
         await self.coordinator.async_refresh_library()
 
 
@@ -62,7 +62,7 @@ class MuPiBoxRestartUIButton(MuPiBoxAdminButton):
         super().__init__(entry, "restart_ui")
 
     async def async_press(self) -> None:
-        await self.api.async_admin_post("/api/admin/ui/restart")
+        await box_call(self.api.async_admin_post("/api/admin/ui/restart"))
         await self.coordinator.async_request_refresh()
 
 
@@ -75,9 +75,9 @@ class MuPiBoxRebootButton(MuPiBoxAdminButton):
         super().__init__(entry, "reboot")
 
     async def async_press(self) -> None:
-        await self.api.async_admin_post(
+        await box_call(self.api.async_admin_post(
             "/api/admin/system/power", {"action": "reboot"}
-        )
+        ))
 
 
 class MuPiBoxPowerOffButton(MuPiBoxAdminButton):
@@ -88,9 +88,9 @@ class MuPiBoxPowerOffButton(MuPiBoxAdminButton):
         super().__init__(entry, "power_off")
 
     async def async_press(self) -> None:
-        await self.api.async_admin_post(
+        await box_call(self.api.async_admin_post(
             "/api/admin/system/power", {"action": "poweroff"}
-        )
+        ))
 
 
 class MuPiBoxV1PowerButton(MuPiBoxEntity, ButtonEntity):
@@ -104,4 +104,4 @@ class MuPiBoxV1PowerButton(MuPiBoxEntity, ButtonEntity):
             self._attr_device_class = ButtonDeviceClass.RESTART
 
     async def async_press(self) -> None:
-        await self.api.async_power(self._action)
+        await box_call(self.api.async_power(self._action))
