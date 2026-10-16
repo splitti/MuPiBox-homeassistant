@@ -1,8 +1,10 @@
 # Changelog
 
 
-## Unreleased
+## 0.5.3
 
+- Distinguishable discovery cards: Classic versus NG plus the advertised box
+  name, with hostname and mDNS instance fallbacks for older firmware.
 - Add shared optional Classic/NG power-off timer (v1 capability,
   number entity with power scope, timestamp sensor and developer contract).
 

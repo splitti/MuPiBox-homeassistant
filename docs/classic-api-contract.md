@@ -26,7 +26,14 @@ id=7e1f82a4-55ab-47d7-8b60-02e8dff65b90  # optional backward-compatible NG field
 device_id=7e1f82a4-55ab-47d7-8b60-02e8dff65b90
 pairing=required
 transport=https
+name=Kinderzimmer                  # optional friendly display name
 ```
+
+The optional DNS-SD TXT field name SHOULD advertise the human-readable
+box name in UTF-8. Home Assistant shows both the generation (Classic or NG)
+and the box name in its discovery card. Older firmware without this field
+falls back to the service instance or SRV hostname. This is untrusted
+display-only metadata; neither pairing identity nor TLS trust may depend on it.
 
 Port in SRV record is the **actual** TLS listener; SRV target is the advertised local hostname. TXT MUST NOT include codes, passwords, tokens, fingerprints treated as trustworthy, or private keys. `device_id` MUST be a persistent UUID (same across IP changes/reboots/updates). `generation` MUST equal `classic` or `ng` for v1-capable boxes. Advertisements lacking `generation` or `transport=https` are legacy hints only; the v1 HACS onboarding flow MUST NOT prompt for a legacy admin password or use HTTP. A Classic box MUST NOT advertise `generation=ng`. Zero-conf discovery is an untrusted hint, not authentication. Manual hostname/IP entry MUST be available for networks without multicast bridging.
 

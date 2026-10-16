@@ -14,6 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
 from .classic_contract import CLASSIC_GENERATION, discovery_generation
+from .discovery_label import discovery_title
 from .v1_api import MuPiBoxV1Client
 from .v1_trust import probe_device_key, fetch_verified_ca, normalized_fingerprint
 from .api import (
@@ -40,15 +41,6 @@ def _endpoint_unique_id(data: dict[str, Any]) -> str:
     """Return the legacy endpoint identity for older MuPiBox versions."""
     scheme = "https" if data.get(CONF_USE_SSL) else "http"
     return f"{scheme}://{str(data[CONF_HOST]).lower()}:{data[CONF_PORT]}"
-
-
-def _discovery_name(discovery_info: ZeroconfServiceInfo) -> str:
-    """Return the human-readable mDNS instance name."""
-    suffix = "._mupibox._tcp.local."
-    name = discovery_info.name
-    if name.lower().endswith(suffix):
-        name = name[: -len(suffix)]
-    return name.rstrip(".") or "MuPiBox-NG"
 
 
 class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -148,7 +140,13 @@ class MuPiBoxConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             CONF_USE_SSL: True,
             "protocol": "ha_v1",
         }
-        self._v1_name = _discovery_name(discovery_info)
+        # Discovery cards show context title_placeholders, not the eventual
+        # config entry title; populate them before displaying the trust form.
+        self._v1_name = discovery_title(
+            discovery_info.properties, self._v1_generation,
+            discovery_info.name, discovery_info.host,
+        )
+        self.context["title_placeholders"] = {"name": self._v1_name}
         try:
             self._v1_fingerprint, self._v1_cert_digest = await probe_device_key(
                 host, int(discovery_info.port)

@@ -127,6 +127,15 @@ entities, including notifications and maintenance controls, remain unchanged.
 See docs/classic-api-contract.md for the full protocol, wire schemas,
 security requirements and acceptance tests.
 
+### Distinguishable discovery
+
+The Home Assistant discovered-devices list identifies MuPiBox Classic and
+MuPiBox NG with their individual box name, for example, MuPiBox Classic –
+JanBox or MuPiBox NG – Felix Musikbox (pi110.local). The optional DNS-SD
+TXT property name supplies the friendly name; existing firmware falls back
+to the service instance or hostname. These untrusted discovery labels never
+replace fingerprint verification or the device's persistent identity.
+
 ### Optional Classic/NG power-off timer
 
 Firmware advertising `sleep_timer` adds a read-only timestamp sensor
