@@ -158,7 +158,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> b
         _remove_obsolete_entities(hass, entry)
 
     entry.runtime_data = MuPiBoxRuntimeData(api=api, coordinator=coordinator)
-    platforms = ["media_player", "sensor", "binary_sensor", "button", "select", "camera"] + (["notify"] if "notify" in entry.data.get("scopes", []) else []) if entry.data.get("protocol") == "ha_v1" else PLATFORMS
+    platforms = ["media_player", "sensor", "binary_sensor", "button", "select", "camera", "number"] + (["notify"] if "notify" in entry.data.get("scopes", []) else []) if entry.data.get("protocol") == "ha_v1" else PLATFORMS
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
     return True
 
@@ -177,5 +177,5 @@ def _adopt_box_name(hass: HomeAssistant, entry: MuPiBoxConfigEntry, info: dict) 
 
 async def async_unload_entry(hass: HomeAssistant, entry: MuPiBoxConfigEntry) -> bool:
     """Unload a MuPiBox-NG config entry."""
-    platforms = ["media_player", "sensor", "binary_sensor", "button", "select", "camera"] + (["notify"] if "notify" in entry.data.get("scopes", []) else []) if entry.data.get("protocol") == "ha_v1" else PLATFORMS
+    platforms = ["media_player", "sensor", "binary_sensor", "button", "select", "camera", "number"] + (["notify"] if "notify" in entry.data.get("scopes", []) else []) if entry.data.get("protocol") == "ha_v1" else PLATFORMS
     return await hass.config_entries.async_unload_platforms(entry, platforms)

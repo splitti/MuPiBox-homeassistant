@@ -17,6 +17,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import MuPiBoxConfigEntry
 from .entity import MuPiBoxEntity
+from .sleep_timer_contract import end_datetime
 
 
 PROVIDER_NAMES = {
@@ -35,7 +36,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up MuPiBox sensors."""
     if entry.data.get("protocol") == "ha_v1":
-        async_add_entities([
+        entities: list[SensorEntity] = [
             MuPiBoxBatterySensor(entry),
             MuPiBoxBatteryVoltageSensor(entry),
             MuPiBoxBatteryCurrentSensor(entry),
@@ -48,7 +49,10 @@ async def async_setup_entry(
             MuPiBoxStorageUsageSensor(entry),
             MuPiBoxActiveProviderSensor(entry),
             MuPiBoxVersionSensor(entry),
-        ])
+        ]
+        if "sleep_timer" in entry.runtime_data.coordinator.data.info.get("capabilities", []):
+            entities.append(MuPiBoxSleepTimerEndSensor(entry))
+        async_add_entities(entities)
         return
     entities: list[SensorEntity] = [
         MuPiBoxBatterySensor(entry),
@@ -383,3 +387,24 @@ class MuPiBoxOperatingStateSensor(MuPiBoxEntity, SensorEntity):
     def native_value(self) -> str | None:
         value = self.coordinator.data.system.get("power_state")
         return value if value in self._attr_options else None
+
+
+
+class MuPiBoxSleepTimerEndSensor(MuPiBoxEntity, SensorEntity):
+    """Time at which the box begins its power-off sequence."""
+
+    _attr_translation_key = "sleep_timer_ends_at"
+    _attr_icon = "mdi:clock-end"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, entry: MuPiBoxConfigEntry) -> None:
+        super().__init__(entry, "sleep_timer_ends_at")
+
+    @property
+    def available(self) -> bool:
+        return super().available and bool(self.coordinator.data.sleep_timer)
+
+    @property
+    def native_value(self):
+        timer = self.coordinator.data.sleep_timer
+        return end_datetime(timer) if timer else None

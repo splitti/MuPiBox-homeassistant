@@ -41,6 +41,7 @@ class MuPiBoxData:
     auth: dict[str, Any] = field(default_factory=dict)
     library: list[dict[str, Any]] = field(default_factory=list)
     update: dict[str, Any] = field(default_factory=dict)
+    sleep_timer: dict[str, Any] = field(default_factory=dict)
 
 
 class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
@@ -107,6 +108,13 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
                 info = await self.api.async_get_info()
                 self._last_info = now
 
+            sleep_timer: dict[str, Any] = {}
+            if self._is_v1 and "sleep_timer" in info.get("capabilities", []):
+                try:
+                    sleep_timer = await self.api.async_get_sleep_timer()
+                except MuPiBoxApiError as err:
+                    _LOGGER.warning("Could not read power-off timer: %s", err)
+
             auth = self._cached.auth
             if not auth or now - self._last_auth >= AUTH_UPDATE_INTERVAL_SECONDS:
                 auth = await self.api.async_get_admin_auth()
@@ -142,6 +150,7 @@ class MuPiBoxCoordinator(DataUpdateCoordinator[MuPiBoxData]):
             auth=auth,
             library=library,
             update=update,
+            sleep_timer=sleep_timer,
         )
         return self._cached
 

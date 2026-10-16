@@ -239,6 +239,26 @@ class MuPiBoxV1Client(MuPiBoxApiClient):
     async def async_get_update(self) -> dict[str, Any]:
         return await self._v1("GET", "update")
 
+    async def async_get_sleep_timer(self) -> dict[str, Any]:
+        from .sleep_timer_contract import normalize_sleep_timer
+
+        raw = await self._state()
+        try:
+            return normalize_sleep_timer(raw.get("sleep_timer"))
+        except (ValueError, TypeError) as error:
+            raise MuPiBoxApiError(f"Invalid sleep_timer state: {error}") from error
+
+    async def async_set_sleep_timer(self, minutes: int) -> dict[str, Any]:
+        from .sleep_timer_contract import MAX_SLEEP_TIMER_MINUTES
+
+        if type(minutes) is not int or not 0 <= minutes <= MAX_SLEEP_TIMER_MINUTES:
+            raise ValueError("Timer must be an integer from 0 to 720 minutes")
+        result = await self._v1("POST", "sleep_timer", {"minutes": minutes})
+        # A status refresh must not see stale data from the two-second cache.
+        async with self._state_lock:
+            self._state_cache = None
+        return result
+
     async def async_power(self, action: str) -> dict[str, Any]:
         if action not in ("reboot", "poweroff"):
             raise ValueError("Invalid power action")

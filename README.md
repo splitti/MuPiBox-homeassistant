@@ -127,6 +127,18 @@ entities, including notifications and maintenance controls, remain unchanged.
 See docs/classic-api-contract.md for the full protocol, wire schemas,
 security requirements and acceptance tests.
 
+### Optional Classic/NG power-off timer
+
+Firmware advertising `sleep_timer` adds a read-only timestamp sensor
+(**Power off at**) and, if the user explicitly paired the `power` scope,
+a **Sleep timer** number control (0–720 minutes; 0 stops). This performs a
+real system shutdown, not the NG parental playback lock.
+Older boxes continue working with no timer entities.
+
+Classic developers: [implementation guide](docs/CLASSIC_SLEEP_TIMER.md)
+and [API v1 contract](docs/classic-api-contract.md).
+
+
 ## New connections from 0.4.1
 
 Only HTTPS API v1 pairing is offered for NEW setups. Remove an old NG legacy configuration entry in Home Assistant before re-pairing the same physical box; the stable device ID intentionally prevents duplicates. Back up automations/dashboard entity IDs first. The legacy HTTP API remains available locally for MuPiBox components, and already configured HA legacy entries are not automatically deleted.

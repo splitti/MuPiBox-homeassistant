@@ -1,5 +1,12 @@
 # Changelog
 
+
+## Unreleased
+
+- Add shared optional Classic/NG power-off timer (v1 capability,
+  number entity with power scope, timestamp sensor and developer contract).
+
+
 ## 0.5.2
 
 - Brand images in `brand/` at the sizes Home Assistant expects (icon and logo 256 × 256 plus `@2x` 512 × 512, trimmed, transparent), rendered from the high-resolution MuPiBox logo. Since Home Assistant 2026.3 these local images replace the brands CDN, which no longer accepts custom integrations.

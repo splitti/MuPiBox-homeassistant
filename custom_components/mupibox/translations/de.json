@@ -87,6 +87,9 @@
           "display_off": "Display aus",
           "standby": "Standby"
         }
+      },
+      "sleep_timer_ends_at": {
+        "name": "Ausschalten um"
       }
     },
     "select": {
@@ -100,6 +103,11 @@
       },
       "tts_announcement": {
         "name": "Sprachnachricht ausgeben"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Ausschalt-Timer"
       }
     }
   },

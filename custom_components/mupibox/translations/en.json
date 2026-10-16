@@ -87,6 +87,9 @@
           "display_off": "Display off",
           "standby": "Standby"
         }
+      },
+      "sleep_timer_ends_at": {
+        "name": "Power off at"
       }
     },
     "select": {
@@ -100,6 +103,11 @@
       },
       "tts_announcement": {
         "name": "Speak announcement"
+      }
+    },
+    "number": {
+      "sleep_timer": {
+        "name": "Sleep timer"
       }
     }
   },

@@ -226,6 +226,57 @@ When no update is available `update_available` is `false` and `release` MAY be `
 
 Allowed `action` values: `reboot`, `poweroff`. Successful scheduling (not completion) responds HTTP **202** with `{"success":true,"accepted":true}`. `read`, `control` and `notify` alone MUST return `403 insufficient_scope`. Box-specific shutdown sound/cleanup MUST still execute through the normal device lifecycle. HA MUST confirm destructive power actions in the UI. If `power` scope was not granted, do not render active power buttons.
 
+### Power-off sleep timer: POST /sleep_timer (power scope, optional)
+
+This additive API-v1 extension is **full box shutdown**, not a playback
+pause, screen-off or parental-control lock. Devices MUST advertise
+the capability `sleep_timer` in GET /info **only after** implementing all
+commands and the corresponding read-only state.
+
+**POST /api/ha/v1/sleep_timer** uses verified HTTPS and Bearer authorization
+with `power` scope. The sole valid body field is `minutes`, strictly a JSON
+integer from 0 through 720. Values 1–720 start/atomically replace the one
+box-wide timer; 0 stops it idempotently, including when no timer exists.
+Other JSON types, unknown fields and out-of-range values fail HTTP 400
+without changing the current timer. On successful persistence, HTTP 200:
+
+    {"success":true,"sleep_timer":{"active":true,
+      "ends_at":"2026-10-17T00:45:00+02:00","remaining_s":1800}}
+
+A stopped timer returns HTTP 200 with:
+
+    {"success":true,"sleep_timer":{"active":false,
+      "ends_at":null,"remaining_s":0}}
+
+**GET /api/ha/v1/state** (`read` scope) contains top-level `sleep_timer`,
+next to `playback` and `device`, with the exact object schema above.
+`active` is a boolean. `ends_at` is a timezone-aware RFC-3339 timestamp
+or null. `remaining_s` is a nonnegative integer, derived from the
+absolute deadline and rounded **upward**. The inactive state is always
+`{"active":false,"ends_at":null,"remaining_s":0}`. At the deadline the
+shutdown sequence begins; `remaining_s` may be 0 with `active:true` until
+the system accepts shutdown. The endpoint must report the box's actual
+timer even if an app, Telegram or the box UI changed it. A lost Home
+Assistant connection never stops the timer.
+
+The timer is **single-owner and box-local**. Replace must ensure the old
+deadline can never power off the box. Cancellation/replacement before
+irrevocable shutdown scheduling prevents old poweroff. Respect normal
+fade-out, audio cleanup, shutdown sound and system-agent behavior.
+Persist deadlines across backend restarts, recover overdue shutdown
+safely, and clear completed ones before the next boot.
+
+Error codes: plaintext -> 426 `https_required`; missing/invalid token ->
+401 `unauthorized`; read/control/notify without power -> 403
+`insufficient_scope`; malformed body -> 400 `invalid_request`;
+out-of-range values -> 400 `invalid_value`; unavailable persistence or
+timer engine -> 503 `temporarily_unavailable`. No success without commit,
+no token logging. Existing v1 installations without `sleep_timer` remain
+fully functional; HA sensor needs only `read`, number control also
+requires explicitly granted `power` scope.
+
+Classic: [implementation guide and full acceptance checklist](CLASSIC_SLEEP_TIMER.md).
+
 ### `POST /message` (`notify`)
 
 ```json
