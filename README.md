@@ -1,173 +1,85 @@
 # MuPiBox for Home Assistant
 
-Home Assistant integration for **MuPiBox / MuPiBox-NG**.
+Official HACS custom integration for **MuPiBox Classic and MuPiBox NG**.
 
-**Author and maintainer:** Olaf Splitt  
+**Maintainer:** Olaf Splitt ([@splitti](https://github.com/splitti))  
 **Website:** https://mupibox.de  
-**MuPiBox-NG:** https://github.com/splitti/MuPiBox-NG  
-**Home Assistant integration version:** 0.4.8
+**Project documentation:** https://docs.mupibox.de  
+**Integration version in `manifest.json`:** **0.5.3** (19 October 2026)  
+**Repository:** https://github.com/splitti/MuPiBox-homeassistant
 
-The Home Assistant integration is versioned independently from MuPiBox-NG.
+The integration has its **own version numbers**, independently of the MuPiBox Classic and NG firmware versions. The installed HACS version is determined by the latest published release; the version above is the version currently declared in the main branch.
 
-## Features
+> **Official HACS catalog:** [The addition was approved and merged on 19 October 2026](https://github.com/hacs/default/pull/11101). Adding a custom repository is no longer necessary once your HACS catalog has refreshed.
 
-- One provider-neutral MuPiBox media player for local media, radio, podcasts, ARD Sounds, Audible and Spotify
-- Automatic routing of play/pause/next/previous/seek/volume to the currently active playback backend
-- Home Assistant media browser for the MuPiBox local library plus direct `spotify:` URI playback
-- Display messages on the MuPiBox touch screen through a Home Assistant notify entity
-- TTS announcements through a separate notify entity
-- Live MuPiHAT battery percentage, voltage, current, charging/external-power and temperature diagnostics
-- Wi-Fi/network diagnostics including signal, quality, interface and IP address
-- CPU, RAM, storage and CPU-temperature diagnostics
-- Selectable audio output for local playback, Bluetooth, Sonos and Music Assistant targets currently available to the box
-- Optional playback-engine diagnostic (`mpv`), disabled by default because it is only useful for troubleshooting
-- Active playback-provider sensor and provider status for Spotify, Music Assistant, Jellyfin, Audible and Sendspin
-- Library rescan and UI restart controls
-- Reboot and power-off controls with optional MuPiBox Admin authentication
-- MuPiBox display screenshot camera
+## Compatibility: Classic and NG
 
-The integration exposes the physical MuPiBox as **one media player**. Spotify is no longer represented as a second speaker entity; the box itself decides which backend is active and Home Assistant follows that state.
+Both generations use the same secure Home Assistant integration, provided the installed firmware implements the **MuPiBox HTTPS Home Assistant API v1** contract. A firmware's branding or the presence of older HTTP endpoints alone is **not** proof of API v1 compatibility.
 
-## Requirements
+- **MuPiBox NG:** supports secure API v1 onboarding and the features described below, subject to firmware capabilities.
+- **MuPiBox Classic:** is recognized separately (generation `classic`). A Classic firmware implementing the shared API v1 contract can be paired and controlled in the same way. Available entities follow the capabilities and data provided by that box.
+- **Existing legacy NG entries:** continue to work without automatic migration. New installations **cannot** be configured with legacy HTTP/admin-password onboarding.
+- Device names and generations are displayed during discovery (for example, **MuPiBox Classic – Kinderzimmer** and **MuPiBox NG – Wohnzimmer**) so multiple boxes can be distinguished.
+- One Home Assistant device and one provider-neutral media player are created per paired MuPiBox; no extra Spotify speaker is created.
 
-- A MuPiBox-NG installation exposing its local HTTP API
-- Default API port: `8090`
-- Home Assistant 2026.3 or newer is recommended for local custom-integration branding
+The [versioned Classic/NG API contract](docs/classic-api-contract.md) defines requirements for firmware developers; it does not guarantee that every Classic build has all endpoints.
 
-## Installation with HACS
+## Install from HACS
 
-Until this repository is included in the default HACS catalog:
+1. Open **HACS** in Home Assistant and search for **MuPiBox**.
+2. Select the integration and choose **Download**.
+3. Restart Home Assistant.
+4. Ensure **Smart Home / automatic discovery** is enabled on the MuPiBox. Open **Settings → Devices & services** in Home Assistant and select the discovered box. Alternatively, choose **Add integration → MuPiBox** and enter its hostname/IP and **HTTPS port 8443**.
+5. On the MuPiBox, open **Admin → Smart Home → Home Assistant sicher koppeln** (equivalent label on Classic). Enable local pairing approval.
+6. Compare the **64-character SHA-256 SPKI fingerprint** displayed in the box's Admin interface with the fingerprint requested by Home Assistant. Copy/paste or enter it only after confirming it matches. This checks the box's TLS identity independently from mDNS.
+7. Choose any additional permissions (`notify` for display messages/TTS and/or `power` for reboot, shutdown and the optional power-off timer), approve pairing locally and enter the **six-digit code shown on the box** in Home Assistant. The code is valid for up to five minutes.
 
-1. Open **HACS → Integrations**.
-2. Open the menu and select **Custom repositories**.
-3. Add `https://github.com/splitti/MuPiBox-homeassistant`.
-4. Select category **Integration**.
-5. Install **MuPiBox**.
-6. Restart Home Assistant.
-7. MuPiBox devices advertising `_mupibox._tcp.local.` appear automatically under **Settings → Devices & services → Discovered**. Select **Configure** to add one.
-8. Manual setup through **Add integration → MuPiBox** remains available as a fallback.
+**No MuPiBox Admin password is required for a new secure API v1 pairing.** HACS only installs/updates the integration; secure pairing takes place through Home Assistant.
 
-Updates are published from this repository. The Home Assistant integration uses its own release numbers and does not follow the MuPiBox-NG application version.
+If the integration does not appear immediately in HACS, refresh HACS's catalog and try again. Older instructions describing HACS **Custom repositories** are only a fallback, not the normal installation path.
 
-## Manual installation
+## Features in secure API v1 (0.5.3)
 
-Copy `custom_components/mupibox` to:
+| Feature | Availability |
+| --- | --- |
+| Play, pause, stop, next/previous, seek, volume; currently playing title and provider | Included with `read` / `control`, if the box exposes playback |
+| Battery percentage, charging, MuPiHAT current/voltage/temperature | When supported and reported by the box; absent hardware is not shown as zero |
+| Wi-Fi connectivity/signal, network status, CPU/RAM/storage, CPU temperature | Diagnostics where the box reports values |
+| Operating state (playing, in use, idle, display off, standby), software version | Where firmware supplies these fields |
+| Select the audio output (local/Bluetooth/other targets) | Based on currently available/selectable outputs supplied by the box |
+| View a display screenshot as a camera entity | `read` permission; requires the screenshot endpoint |
+| Check update availability | Diagnostic binary sensor via secure `/update` endpoint |
+| Display a message or make a TTS announcement | Additional **`notify`** permission |
+| Reboot or shut down the box | Additional **`power`** permission |
+| Power-off timer (0–720 minutes; `0` cancels) and “Power off at” sensor | Only when firmware advertises `sleep_timer`. Setting requires `power`; reading the end timestamp requires `read` |
 
-`<Home Assistant config>/custom_components/mupibox`
+The power-off timer shuts down the **whole device**, not just playback. It is distinct from parental-control playback limits. See [Classic sleep-timer firmware notes](docs/CLASSIC_SLEEP_TIMER.md).
 
-and restart Home Assistant.
+**Not yet mapped over secure API v1:** legacy HTTP library browsing, library-rescan button, UI-restart button and detailed individual provider-status sensors. Do not assume these controls exist in a newly paired Classic/NG device just because they appear in an older dashboard.
 
-## Configuration
+### Extend permissions later (without losing entities)
 
-For automatically discovered boxes, the config flow already knows the host and API port and only asks for confirmation plus an optional Admin password.
+Open **Settings → Devices & services → MuPiBox → Configure**, choose notifications/TTS and/or power, approve a fresh pairing on the box and enter the new six-digit code. The integration updates the existing configuration entry, preserving its device identity and Home Assistant entity registry IDs. Existing tokens are **not silently given additional permissions**.
 
-Manual setup asks for:
+## Existing legacy HTTP installations
 
-- MuPiBox host or IP address
-- API port (default: `8090`)
-- HTTPS on/off
-- optional MuPiBox Admin password
+Previously configured NG connections remain supported to avoid breaking automations. Their earlier features can include media browsing, direct `spotify:` URIs, per-provider status, library rescan and UI restart, along with screenshots, notifications, output routing and protected Admin actions. They may use local HTTP port `8090` and an optional Admin password.
 
-MuPiBox-NG 0.1.0-dev builds with discovery support advertise a persistent `box_id`. Home Assistant uses that identity instead of the IP address, so DHCP address changes do not create a second device.
+**Do not use legacy HTTP for new Home Assistant onboarding.** To change an older entry to API v1, first back up your entity IDs, dashboards and automations; removing and re-adding it may require updating references.
 
-The Admin password is only required for protected maintenance functions such as library rescan, UI restart, reboot, shutdown and display screenshots when Admin protection is enabled.
+## Dashboard examples and API reference
 
-## Dashboard template
+- [Dashboard templates](docs/DASHBOARD.md) — built-in Home Assistant cards, a feature-availability matrix and optional timer controls
+- [Home Assistant API guide](docs/API.md) — secure v1 pairing, permissions and legacy API reference
+- [Shared Classic/NG API v1 contract](docs/classic-api-contract.md) — protocol and security requirements
+- [Classic sleep-timer implementation guide](docs/CLASSIC_SLEEP_TIMER.md) — developer reference
 
-A compact, dependency-free two-view MuPiBox dashboard template is included in the repository. It uses only native Home Assistant cards and supports playback, selectable audio output routing, provider status, display preview, quick actions and a separate diagnostics view.
+## Manual installation (optional)
 
-See [docs/DASHBOARD.md](docs/DASHBOARD.md) for requirements, entity mapping and installation, and [docs/dashboard-template.yaml](docs/dashboard-template.yaml) for the ready-to-copy template.
+Download a released version and copy `custom_components/mupibox` to `<Home Assistant config>/custom_components/mupibox`, then restart Home Assistant. **HACS installation is recommended** for updates.
 
-## Dashboard templates
+## Validation, support and license
 
-Ready-to-use Home Assistant dashboard examples are available in [docs/DASHBOARD.md](docs/DASHBOARD.md):
+The repository includes HACS and Hassfest validation workflows. Report problems and firmware incompatibilities in [GitHub Issues](https://github.com/splitti/MuPiBox-homeassistant/issues), including integration version, box generation, box firmware version and the unsupported capability (without fingerprints, pairing codes or tokens).
 
-- a compact MuPiBox card for an existing dashboard
-- a full responsive Player + Diagnostics dashboard
-- direct Audio output selection for available local, Bluetooth, Sonos and Music Assistant targets
-
-The templates use **only built-in Home Assistant cards**. No Mushroom, Button Card, Card Mod, Mini Graph Card or ApexCharts dependency is required. Entity IDs are mapped explicitly so the examples can be adapted to any MuPiBox without assuming a particular box/area name.
-
-## API documentation
-
-See [docs/API.md](docs/API.md) for the API mapping and examples used by the integration.
-
-## Versioning
-
-This project uses semantic versioning independently from MuPiBox-NG.
-
-## HACS validation
-
-The repository includes validation workflows for HACS and Home Assistant Hassfest.
-
-## License
-
-MIT License. See [LICENSE](LICENSE).
-
-
-## Secure API v1 (0.4.0, opt-in)
-
-Existing NG installations stay on the legacy HTTP API with their saved admin
-sessions, device and entity IDs and dashboards. No automatic migration or
-re-pairing is performed. API v1 supports both MuPiBox Classic and NG if the
-corresponding box firmware implements the shared contract.
-
-For a new API v1 connection, Home Assistant discovers the HTTPS Zeroconf
-advertisement (or use manual mode secure_v1, port 8443). In NG Admin -> Smart
-Home, click "Home Assistant sicher koppeln" to show the SPKI fingerprint on
-the physical box. Enter and verify the fingerprint in the Home Assistant setup
-dialog. Return to NG Admin and allow pairing again immediately before
-requesting the six-digit code in Home Assistant. Enter the code shown on the
-box (valid for 300 seconds). The box grants only read/control by default.
-
-V1 currently exposes a provider-neutral media player plus battery, Wi-Fi,
-provider and software-version sensors where supported. Existing legacy NG
-entities, including notifications and maintenance controls, remain unchanged.
-
-See docs/classic-api-contract.md for the full protocol, wire schemas,
-security requirements and acceptance tests.
-
-### Distinguishable discovery
-
-The Home Assistant discovered-devices list identifies MuPiBox Classic and
-MuPiBox NG with their individual box name, for example, MuPiBox Classic –
-JanBox or MuPiBox NG – Felix Musikbox (pi110.local). The optional DNS-SD
-TXT property name supplies the friendly name; existing firmware falls back
-to the service instance or hostname. These untrusted discovery labels never
-replace fingerprint verification or the device's persistent identity.
-
-### Optional Classic/NG power-off timer
-
-Firmware advertising `sleep_timer` adds a read-only timestamp sensor
-(**Power off at**) and, if the user explicitly paired the `power` scope,
-a **Sleep timer** number control (0–720 minutes; 0 stops). This performs a
-real system shutdown, not the NG parental playback lock.
-Older boxes continue working with no timer entities.
-
-Classic developers: [implementation guide](docs/CLASSIC_SLEEP_TIMER.md)
-and [API v1 contract](docs/classic-api-contract.md).
-
-
-## New connections from 0.4.1
-
-Only HTTPS API v1 pairing is offered for NEW setups. Remove an old NG legacy configuration entry in Home Assistant before re-pairing the same physical box; the stable device ID intentionally prevents duplicates. Back up automations/dashboard entity IDs first. The legacy HTTP API remains available locally for MuPiBox components, and already configured HA legacy entries are not automatically deleted.
-
-## Discovery pairing experience (0.4.2)
-
-Click **Add** on the HTTPS-discovered MuPiBox. Confirm its out-of-band fingerprint once. HACS requests the six-digit code automatically; no separate manual HA pairing-start click. The box must first be approved in its local Admin → Smart Home within the 60-second window. If approval is missing, the dialog offers a retry after approval.
-
-## API v1 restored diagnostics (0.4.4)
-
-Secure API v1 now exposes network connectivity, Wi-Fi connectivity, charging status, CPU usage/temperature, RAM usage and disk usage alongside the original media player, battery, provider and version entities. Notification, audio output, camera and power controls require secure scoped endpoint work and are not yet exposed on v1.
-
-## Secure API v1 maintenance (0.4.5)
-
-Update availability is checked by a diagnostic binary sensor (up to every 10 minutes), and reboot/shutdown buttons can be enabled by explicitly approving the `power` scope during **new pairing**. Existing v1 tokens retain their current scopes; to authorize power a fresh pairing is required. These APIs do not restore legacy TTS, camera, audio-output selection or content browsing yet.
-
-## Secure API v1 endpoints (0.4.7)
-
-Read-scope clients can list `/api/ha/v1/outputs` and retrieve `/api/ha/v1/screenshot`. Control-scope clients can select `/api/ha/v1/outputs/select`. Users may explicitly approve a `notify` scope at pairing to enable `/api/ha/v1/message` and `/api/ha/v1/speak` and the two HA notify entities. Old tokens are never granted newly introduced scopes automatically; re-pair to authorize them. The screenshot and output entities use existing entity IDs, and no unauthenticated v1 fallback is used.
-
-## Extend secure permissions without deleting the HA device (0.4.8)
-
-In Home Assistant → Settings → Devices & services → MuPiBox → Configure, choose TTS/Display notifications and/or power commands, locally approve pairing in MuPiBox Admin and enter the six-digit code. The integration updates the existing config entry in place, preserves its unique ID and all entity registry entries, and loads the newly authorized platforms. Access tokens are replaced only after confirmation; old credentials are revoked after the replacement is persisted.
+MIT License — see [LICENSE](LICENSE).
