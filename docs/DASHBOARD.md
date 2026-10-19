@@ -1,6 +1,6 @@
 # MuPiBox dashboard templates
 
-These examples are designed for the MuPiBox Home Assistant integration **0.3.3 or newer**.
+These examples are designed for the MuPiBox Home Assistant integration **0.5.3**, with compatibility notes for older legacy connections.
 
 ## Dependencies
 
@@ -13,10 +13,25 @@ These examples are designed for the MuPiBox Home Assistant integration **0.3.3 o
 
 **Optional features**
 
-- The display screenshot card needs the MuPiBox `camera` entity. If Admin protection is enabled on the box, the Home Assistant integration needs the Admin password for this protected endpoint.
-- Library rescan, UI restart, reboot and power-off buttons likewise require the Admin password when Admin protection is enabled.
+- For secure API v1, the display screenshot camera uses the authenticated `read` scope and the box's screenshot endpoint; no Admin password is required. For existing legacy HTTP entries, the screenshot endpoint may require the configured Admin password.
+- In secure API v1, reboot/power-off controls require the explicitly approved `power` scope. Library rescan and UI restart are **legacy-only** and are not exposed for new v1 pairings. Existing legacy entries can require the Admin password for protected functions.
 
-The **Audio output** selector itself does not need an Admin password. Its choices are discovered dynamically from the box and can include the local MuPiBox output, paired Bluetooth devices, Sonos targets and Music Assistant targets.
+The **Audio output** selector in secure v1 uses the normal `read` and `control` scopes; no Admin password is needed. Its choices are discovered dynamically from the box and can include the local MuPiBox output, paired Bluetooth devices, Sonos targets and Music Assistant targets.
+
+## Which cards work in new secure API v1 connections?
+
+After [official HACS installation](../README.md), new MuPiBox Classic/NG devices pair through **HTTPS API v1 on port 8443**, not the old HTTP port. The box determines which capabilities and measurements it provides. The following examples are **templates**, not a guarantee that every box exposes every entity.
+
+| Card or entity | Secure v1 0.5.3 |
+| --- | --- |
+| Player, battery, network/Wi-Fi, system diagnostics, operating state, audio output, display screenshot | Yes, when reported/supported by the box |
+| Display message / spoken announcement | Only when pairing includes the optional `notify` scope |
+| Reboot / shutdown | Only when pairing includes the optional `power` scope |
+| Power-off timer / “Power off at” | Only if the firmware advertises `sleep_timer`; changing it also requires `power` |
+| Per-provider Spotify/Music Assistant/Jellyfin/Audible/Sendspin status | **Legacy HTTP only**; v1 exposes the active provider instead |
+| UI restart, library rescan and media library browser | **Legacy HTTP only** |
+
+Remove unsupported cards and references from the examples below. Otherwise Home Assistant will show “Entity not found” for legitimate v1 pairings. The separate `notify` and `power` scopes can be enabled in **Settings → Devices & services → MuPiBox → Configure**, followed by local approval and a new six-digit code, without deleting the existing device.
 
 ## Before pasting a template
 
@@ -425,3 +440,19 @@ cards:
       - MUPIBOX_BATTERY
 ```
 
+
+## Optional power-off timer card (secure v1)
+
+If the box advertises `sleep_timer`, add a native Entities card with the **Power off at** timestamp sensor and, when paired with `power`, the editable number entity:
+
+```yaml
+type: entities
+title: MuPiBox Ausschalt-Timer
+entities:
+  - entity: MUPIBOX_SLEEP_TIMER_ENDS_AT
+    name: Ausschalten um
+  - entity: MUPIBOX_SLEEP_TIMER_MINUTES
+    name: Ausschalten in Minuten
+```
+
+Replace both placeholder IDs with those shown for your box under **Settings → Devices & services → MuPiBox**. Setting the timer to **0** cancels it, values **1–720** schedule a full device shutdown. This feature is not the parental-control playback lock and is absent when unsupported.
