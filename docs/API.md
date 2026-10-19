@@ -1,4 +1,40 @@
-# Home Assistant / HACS integration
+# MuPiBox Home Assistant API reference
+
+> **Current integration: 0.5.3 (19 October 2026).** MuPiBox is in the [official HACS catalog](https://github.com/hacs/default/pull/11101). The normal HACS setup and all **new** Home Assistant connections use the secure **HTTPS API v1**. The legacy HTTP material further below is retained **only** for existing NG installations and firmware developers; it is not a current onboarding guide.
+
+## Install and pair (Classic / NG API v1)
+
+1. In **HACS**, search for **MuPiBox**, download it, and restart Home Assistant. No custom repository is required after the catalog refresh.
+2. Enable automatic discovery on the box; Home Assistant discovers `_mupibox._tcp.local.` with a distinct **Classic** or **NG** device label and the box's friendly name. Or choose **Add integration → MuPiBox** and provide the HTTPS hostname/IP and port **8443**.
+3. On the box's local **Admin → Smart Home** page, begin secure Home Assistant pairing. Compare the **SHA-256 SPKI** fingerprint (64 hex characters) with the value Home Assistant asks you to confirm. mDNS labels alone do not prove identity.
+4. Approve pairing locally and enter the box's **six-digit pairing code** (valid up to 300 seconds). Default permissions are `read` and `control`. Optional `notify` enables TTS/on-screen messages; optional `power` enables reboot, shutdown and the optional timer control.
+5. To change permissions later without losing entity IDs, open the installed device's **Configure** options and approve a fresh code locally. New scopes are never silently assigned.
+
+**No Admin password, insecure HTTP fallback or port 8090 is used for new API v1 pairing.** Classic requires a firmware implementation advertising and serving the shared HTTPS API v1 contract; Classic branding or Smart Discovery alone does not prove that its build has every endpoint.
+
+## Secure v1 entities and capabilities
+
+| Home Assistant entity | Secure v1 API / permission | Condition |
+| --- | --- | --- |
+| `media_player` | `GET /state`, `POST /control`; `read`/`control` | Provider-neutral playback |
+| Sensors | `GET /state`, `GET /info`; `read` | Battery, MuPiHAT fields, Wi-Fi, CPU/RAM/storage, operating state, active provider and version, if reported |
+| Binary sensors | `GET /state`, `GET /update`; `read` | Network/Wi-Fi, charging, external power if reported, update availability |
+| `select` audio output | `GET /outputs`, `POST /outputs/select`; `read`/`control` | Supported targets supplied by the box |
+| `camera` display screenshot | `GET /screenshot`; `read` | Device must supply screenshot |
+| `notify` display message and TTS | `POST /message`, `POST /speak`; `notify` | Optional, explicitly approved |
+| `button` reboot/poweroff | `POST /power`; `power` | Optional, explicitly approved |
+| `sensor` shutdown timestamp | `GET /state`; `read` | Only if `capabilities` includes `sleep_timer` |
+| `number` sleep timer | `POST /sleep_timer`; `power` | Only if `sleep_timer` supported; 0–720 minutes, 0 cancels |
+
+All paths in this table are relative to `https://BOX:8443/api/ha/v1/`. API v1 uses a **pinned and validated HTTPS identity**, bearer token and scope checks, not the older Admin session. The sleep timer causes a **real system shutdown**; it is not a parental-control playback timer.
+
+**Not currently offered by secure v1:** legacy local-library browsing, direct `spotify:` URI navigation, rescan-library button, UI-restart button and individual provider-health sensors. See the [normative Classic/NG contract](classic-api-contract.md), [Classic sleep-timer guide](CLASSIC_SLEEP_TIMER.md), and [dashboard compatibility guide](DASHBOARD.md).
+
+---
+
+## Legacy HTTP reference — existing NG configuration entries only
+
+The information below documents the older local API on port `8090`. It remains useful for existing installations and device-local tooling, but is **not** the HACS install/configuration path for new devices. Do not use its examples for new HTTPS v1 pairings.
 
 MuPiBox exposes a local HTTP API on port `8090` by default. The Home Assistant custom integration in `custom_components/mupibox` maps the stable player/status endpoints to native Home Assistant devices and entities.
 
